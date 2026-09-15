@@ -1,8 +1,8 @@
 import { useState } from "react";
 import type { SubmitEvent } from "react";
-import logo from "./assets/Logo.png";
-import "./App.scss";
-import { login, register } from "./services/auth.service";
+import logo from "../../assets/Logo.png";
+import "./Authentication.scss";
+import { login, register } from "../../services/auth.service";
 
 type View = "login" | "register";
 
@@ -82,7 +82,7 @@ function getAuthErrorMessage(message: string) {
   return message;
 }
 
-export const App = () => {
+export const Authentication = () => {
   const [view, setView] = useState<View>("login");
 
   const toggleView = () => setView(view === "login" ? "register" : "login");
@@ -271,4 +271,4 @@ const RegisterForm = ({ view, toggleView }: ViewProps) => {
   );
 };
 
-export default App;
+export default Authentication;
