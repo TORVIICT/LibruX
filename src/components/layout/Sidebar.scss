@@ -1,0 +1,246 @@
+$sidebar-bg: #1e40af;
+$sidebar-border: rgba(255, 255, 255, 0.1);
+$sidebar-text: #f8fafc;
+$sidebar-soft: rgba(255, 255, 255, 0.06);
+$sidebar-primary: #1e40af;
+$sidebar-shadow: rgba(15, 23, 42, 0.35);
+
+.sidebar {
+  position: absolute;
+  z-index: 2;
+  top: 20px;
+  left: 20px;
+  bottom: 26px;
+  border-radius: 16px;
+  width: 56px;
+  background: $sidebar-bg;
+  border: 1px solid $sidebar-border;
+  backdrop-filter: blur(12px);
+  transition: width 0.45s ease;
+  box-shadow: 0 18px 45px $sidebar-shadow;
+
+  button {
+    border: 0;
+    background: transparent;
+    cursor: pointer;
+  }
+
+  .material-symbols-outlined {
+    font-size: 18px;
+    color: $sidebar-text;
+  }
+
+  .inner {
+    position: absolute;
+    inset: 0;
+    width: 190px;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+  }
+
+  header {
+    display: flex;
+    align-items: center;
+    height: 64px;
+    border-top-left-radius: 8px;
+    border-top-right-radius: 8px;
+    padding: 0 6px;
+
+    > span {
+      height: 18px;
+      opacity: 0;
+      transition: opacity 0.25s ease;
+    }
+  }
+
+  nav {
+    flex: 1 1 auto;
+    display: flex;
+    flex-direction: column;
+    padding: 0 6px;
+    gap: 2px;
+
+    > button {
+      display: flex;
+      gap: 12px;
+      align-items: center;
+      height: 44px;
+      width: 44px;
+      font-family: "Euclid Circular B", "Poppins", sans-serif;
+      font-size: 14px bold;
+      text-transform: capitalize;
+      line-height: 1;
+      padding: 0 12px;
+      border-radius: 10px;
+      opacity: 0.75;
+      color: $sidebar-text;
+      transition: all 0.25s ease;
+
+      &:hover {
+        background: $sidebar-soft;
+        opacity: 1;
+      }
+
+      &:last-child {
+        margin-top: auto;
+        margin-bottom: 8px;
+      }
+
+      p {
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity 0.25s ease;
+      }
+    }
+  }
+
+  &.open {
+    width: 190px;
+
+    :is(nav button p, header > span) {
+      opacity: 1;
+    }
+
+    nav > button {
+      width: 100%;
+    }
+  }
+
+  &:not(.open) nav > button:hover p {
+    position: relative;
+    opacity: 1;
+    background: rgba(15, 23, 42, 0.9);
+    backdrop-filter: blur(10px);
+    padding: 8px 12px;
+    border-radius: 6px;
+    translate: 16px 0;
+
+    &::after {
+      content: "";
+      position: absolute;
+      top: 50%;
+      left: -4px;
+      height: 8px;
+      width: 8px;
+      translate: 0 -50%;
+      transform: rotate(45deg);
+      border-radius: 1px;
+      background: inherit;
+    }
+  }
+
+  .sidebar-title {
+    font-family: Georgia, "Times New Roman", Times, serif;
+    font-size: 20px bold;
+    color: $sidebar-text;
+    text-transform: capitalize;
+    line-height: 1;
+    opacity: 0;
+    transition: opacity 0.25s ease;
+  }
+}
+
+.sidebar-burger {
+  width: 44px;
+  height: 72px;
+  display: grid;
+  place-items: center;
+  color: $sidebar-text;
+}
+
+$bottombar-h: 60px;
+
+@media (max-width: 450px) {
+  .sidebar,
+  .sidebar.open {
+    position: fixed;
+    top: auto;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: calc(#{$bottombar-h} + env(safe-area-inset-bottom, 0px));
+    border-radius: 16px 16px 0 0;
+    border-bottom: 0;
+    box-shadow: 0 -10px 30px $sidebar-shadow;
+    transition: none;
+
+    header {
+      display: none;
+    }
+
+    .inner {
+      position: static;
+      box-sizing: border-box;
+      width: 100%;
+      height: 100%;
+      flex-direction: row;
+      padding-bottom: env(safe-area-inset-bottom, 0px);
+    }
+
+    nav {
+      flex-direction: row;
+      align-items: stretch;
+      justify-content: space-around;
+      padding: 0 4px;
+      gap: 0;
+
+      > button {
+        flex: 1 1 0;
+        min-width: 0;
+        width: auto;
+        height: 100%;
+        flex-direction: column;
+        justify-content: center;
+        gap: 4px;
+        padding: 6px 2px;
+        border-radius: 12px;
+
+        &:last-child {
+          margin-top: 0;
+          margin-bottom: 0;
+        }
+
+        .material-symbols-outlined {
+          font-size: 22px;
+        }
+
+        p {
+          margin: 0;
+          opacity: 1;
+          pointer-events: auto;
+          font-size: 11px;
+          font-weight: 500;
+          line-height: 1;
+          max-width: 100%;
+          white-space: nowrap;
+          overflow: hidden;
+          text-overflow: ellipsis;
+        }
+      }
+    }
+  }
+
+  .sidebar:not(.open) nav > button:hover p {
+    position: static;
+    background: transparent;
+    backdrop-filter: none;
+    padding: 0;
+    border-radius: 0;
+    translate: none;
+
+    &::after {
+      content: none;
+    }
+  }
+
+  .sidebar-burger {
+    display: none;
+  }
+
+  .app-content {
+    padding-bottom: calc(#{$bottombar-h} + env(safe-area-inset-bottom, 0px) + 16px);
+  }
+}
+
