@@ -3,6 +3,7 @@ import type { SubmitEvent } from "react";
 import logo from "../../assets/Logo.png";
 import "./Authentication.scss";
 import { login, register } from "../../services/auth.service";
+import { useNavigate } from "react-router";
 
 type View = "login" | "register";
 
@@ -146,6 +147,7 @@ const LoginForm = ({ view, toggleView }: ViewProps) => {
 
       setSubmitted(true);
       setData({email: "", password: ""});
+      navigate("/home");
     }
   };
 

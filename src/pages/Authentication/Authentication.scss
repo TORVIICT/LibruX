@@ -230,6 +230,7 @@
   .page.signup-page {
     height: auto;
     min-height: 100vh;
+    max-height: 100vh - env(safe-area-inset-bottom, 0px);
     padding: 24px 0;
   }
 
@@ -249,7 +250,7 @@
   .signup-card .form {
     position: static;
     width: 100%;
-    padding: 24px 16px;
+    padding: 24px 0px;
     translate: none !important;
 
     form {

@@ -4,6 +4,7 @@ $sidebar-text: #f8fafc;
 $sidebar-soft: rgba(255, 255, 255, 0.06);
 $sidebar-primary: #1e40af;
 $sidebar-shadow: rgba(15, 23, 42, 0.35);
+$bottombar-h: 60px;
 
 .sidebar {
   position: absolute;
@@ -148,8 +149,6 @@ $sidebar-shadow: rgba(15, 23, 42, 0.35);
   place-items: center;
   color: $sidebar-text;
 }
-
-$bottombar-h: 60px;
 
 @media (max-width: 450px) {
   .sidebar,

@@ -2,12 +2,14 @@ import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
 import '@fontsource/material-symbols-outlined';
 import './index.css'
-import Authentication from './pages/Authentication/Authentication.tsx'
-import { Sidebar } from './components/layout/Sidebar.tsx'
+import App from './App.tsx'
+import { BrowserRouter } from 'react-router';
+
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
-    <Sidebar />
-    <Authentication />
+    <BrowserRouter>
+      <App />
+    </BrowserRouter>
   </StrictMode>,
 )
