@@ -8,10 +8,10 @@ $bottombar-h: 60px;
 
 .sidebar {
   position: absolute;
-  z-index: 2;
-  top: 20px;
-  left: 20px;
-  bottom: 26px;
+  z-index: 1010;
+  top: 0px;
+  left: 0px;
+  bottom: 15px;
   border-radius: 16px;
   width: 56px;
   background: $sidebar-bg;

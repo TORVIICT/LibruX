@@ -3,6 +3,7 @@ import type { SubmitEvent } from "react";
 import logo from "../../assets/Logo.png";
 import "./Authentication.scss";
 import { login, register } from "../../services/auth.service";
+import { useAuth } from "../../context/AuthContext";
 import { useNavigate } from "react-router";
 
 type View = "login" | "register";
@@ -85,6 +86,12 @@ function getAuthErrorMessage(message: string) {
 
 export const Authentication = () => {
   const [view, setView] = useState<View>("login");
+  const { isAuthenticated } = useAuth();
+  const navigate = useNavigate();
+
+  if (isAuthenticated) {
+    navigate("/dashboard");
+  }
 
   const toggleView = () => setView(view === "login" ? "register" : "login");
 
@@ -120,11 +127,11 @@ const LogoGroup = ({ logo }: { logo: string }) => {
   );
 };
 
-
 const LoginForm = ({ view, toggleView }: ViewProps) => {
   const [data, setData] = useState<LoginData>({ email: "", password: "" });
   const [errors, setErrors] = useState<FormErrors>({});
   const [submitted, setSubmitted] = useState(false);
+  const navigate = useNavigate();
 
   const handleSubmit = async (event: SubmitEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -147,7 +154,10 @@ const LoginForm = ({ view, toggleView }: ViewProps) => {
 
       setSubmitted(true);
       setData({email: "", password: ""});
-      navigate("/home");
+      const userName = authData.user?.user_metadata?.name || authData.user?.email || "Usuario";
+      localStorage.setItem("user-name", userName);
+      
+      navigate("/dashboard");
     }
   };
 

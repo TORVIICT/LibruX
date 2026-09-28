@@ -1,5 +1,11 @@
 :root {
   font-family: Inter, system-ui, sans-serif;
+  height: 100vh;
+}
+
+body{
+  height: 100vh !important;
+
 }
 
 .material-symbols-outlined {

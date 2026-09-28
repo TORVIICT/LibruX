@@ -114,10 +114,6 @@ $color-primary: #1e40af;
   min-width: 200px;
   justify-content: flex-end;
 
-  .mobile-search-trigger {
-    display: none;
-  }
-
   .action-button {
     background: transparent;
     border: none;
@@ -129,6 +125,10 @@ $color-primary: #1e40af;
     padding: 0.5rem;
     border-radius: 50%;
     transition: all 0.2s ease;
+
+    &.mobile-search-trigger {
+      display: none;
+    }
 
     &:hover {
       background-color: #f3f4f6;

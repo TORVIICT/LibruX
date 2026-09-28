@@ -1,0 +1,32 @@
+.layout-page {
+    position: relative;
+    min-height: 100vh;
+    background-color: #ffffff;
+}
+
+.main-container {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    min-height: 100vh;
+    padding-top: 5px;
+    padding-left: 70px;
+    padding-right: 24px;
+    box-sizing: border-box;
+}
+
+.main-content {
+    padding-left: 10vh;
+    flex: 1;
+    overflow-y: auto;
+}
+
+@media (max-width: 450px) {
+    .main-container {
+        padding-left: 0;
+        padding-bottom: 80px;
+    }
+    .main-content {
+        padding-left: 20px;
+    }
+}

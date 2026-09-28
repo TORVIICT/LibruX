@@ -50,7 +50,7 @@ export const Navbar = () => {
                     <div className="avatar-placeholder">
                         <span className="material-symbols-outlined">person</span>
                     </div>
-                    <span className="navbar-username">{localStorage.getItem('username') || 'Usuario'}</span>
+                    <span className="navbar-username">{localStorage.getItem('user-name') || 'Usuario'}</span>
                 </div>
             </div>
         </nav>

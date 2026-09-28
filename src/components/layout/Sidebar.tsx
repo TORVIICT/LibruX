@@ -1,5 +1,6 @@
 import { useState } from "react";
 import "./Sidebar.scss";
+import { useNavigate } from "react-router";
 
 const navDicItems = {
   home: "Home",
@@ -8,8 +9,27 @@ const navDicItems = {
   bookmarks: "Saved books",
 };
 
+const switchView = (view: string) => {
+  switch (view) {
+    case "Home":
+      return "/dashboard";
+    case "Books":
+      return "/books";
+    case "My Loans":
+      return "/loans";
+    case "Saved books":
+      return "/saved-books";
+    case "logout":
+      return "/";
+    default:
+      return "/";
+  }
+};
+
 export const Sidebar = () => {
   const [isOpen, setIsOpen] = useState(false);
+  const navegate = useNavigate();
+  
   return (
     <aside className={`sidebar ${isOpen ? "open" : ""}`}>
       <div className="inner">
@@ -28,14 +48,14 @@ export const Sidebar = () => {
         </header>
         <nav>
           {Object.entries(navDicItems).map(([key, item]) => (
-            <button key={key} type="button">
+            <button key={key} type="button" onClick={() => navegate(switchView(item))}>
               <span className="material-symbols-outlined">{key}</span>
               <p>{item}</p>
             </button>
           ))}
-          <button type="button">
-            <span className="material-symbols-outlined">settings</span>
-            <p>Settings</p>
+          <button type="button" onClick={() => navegate(switchView("logout"))}>
+            <span className="material-symbols-outlined">logout</span>
+            <p>Logout</p>
           </button>
         </nav>
       </div>
