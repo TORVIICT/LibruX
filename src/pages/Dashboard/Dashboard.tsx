@@ -85,7 +85,65 @@ export default function Dashboard() {
 
 
         <div className="library-insights">
-          <h2>Library insights</h2>
+          <div className="library-insights-header">
+            <div className="library-insights-header-info">
+              <span className="material-symbols-outlined">add_diamond</span>
+              <h3>New acquisitions</h3>
+            </div>
+            <span className="insights-badge">newly admitted</span>
+          </div>
+          <div className="library-insights-body">
+            <ul className="acquisitions-list">
+              <li className="acquisition-item">
+                <div className="acquisition-avatar" style={{ backgroundColor: '#1a3a2a' }}>AI</div>
+                <div className="acquisition-info">
+                  <h4>Deep Learning Práctica</h4>
+                  <p className="acquisition-author">Ian Goodfellow et al.</p>
+                  <p className="acquisition-meta">Físico • Stand C-01</p>
+                </div>
+                <button className="bookmark-btn">
+                  <span className="material-symbols-outlined">bookmark</span>
+                </button>
+              </li>
+              <li className="acquisition-item">
+                <div className="acquisition-avatar" style={{ backgroundColor: '#2d4a3e' }}>ST</div>
+                <div className="acquisition-info">
+                  <h4>El Futuro de la IA Sim</h4>
+                  <p className="acquisition-author">K. Henderson</p>
+                  <p className="acquisition-meta">ePub • Digital Ready</p>
+                </div>
+                <button className="bookmark-btn">
+                  <span className="material-symbols-outlined">bookmark</span>
+                </button>
+              </li>
+              <li className="acquisition-item">
+                <div className="acquisition-avatar" style={{ backgroundColor: '#1a3a2a' }}>KR</div>
+                <div className="acquisition-info">
+                  <h4>Kafka: Guía de Arquitectura</h4>
+                  <p className="acquisition-author">G. Shapira</p>
+                  <p className="acquisition-meta">Físico • Stand E-09</p>
+                </div>
+                <button className="bookmark-btn">
+                  <span className="material-symbols-outlined">bookmark</span>
+                </button>
+              </li>
+              <li className="acquisition-item">
+                <div className="acquisition-avatar" style={{ backgroundColor: '#64748b' }}>EN</div>
+                <div className="acquisition-info">
+                  <h4>Pensar Rápido, Pensar Lento</h4>
+                  <p className="acquisition-author">Daniel Kahneman</p>
+                  <p className="acquisition-meta">Físico • Stand A-14</p>
+                </div>
+                <button className="bookmark-btn">
+                  <span className="material-symbols-outlined">bookmark</span>
+                </button>
+              </li>
+            </ul>
+          </div>
+          <button className="explore-catalog-btn">
+            Explorar catálogo completo
+            <span className="material-symbols-outlined">chevron_right</span>
+          </button>
         </div>
 
 
