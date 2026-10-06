@@ -2,6 +2,7 @@ import { CardBook } from "../CardBook/CardBook";
 import "./BookList.scss";
 import { openLibraryEndpoints } from "../../services/openlibrary.service";
 import { useFetch } from "../../hooks/useFetch";
+import { useMemo } from "react";
 
 interface BookListProps {
     query?: string;
@@ -12,8 +13,12 @@ export function BookList({ query = "technology" }: BookListProps) {
         openLibraryEndpoints.searchBooks(query));
 
     if (loading) return <div>Loading...</div>;
+
     if (error) return <div>Error loading...</div>;
-    const books = data?.docs.slice(0, 16) || [];
+
+    const books = useMemo(() => {
+        return data?.docs.slice(0, 16) || [];
+    }, [data]);
 
     return (
         <div className="container-book-list">

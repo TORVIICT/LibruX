@@ -1,3 +1,4 @@
+import { memo } from "react";
 import "./CardBook.scss";
 
 export interface CardBookProps {
@@ -9,7 +10,7 @@ export interface CardBookProps {
     language: string;
 }
 
-export function CardBook({id, cover_i, title, author_name, subject, language}: CardBookProps) {
+function CardBookComponent({id, cover_i, title, author_name, subject, language}: CardBookProps) {
     const coverImage = `https://covers.openlibrary.org/b/id/${cover_i}-M.jpg`;
     const formattedAuthor = Array.isArray(author_name) ? author_name.slice(0, 2).join(", ") : (author_name || "Unknown Author");
     const formattedSubject = Array.isArray(subject) ? subject.slice(0, 3).join(", ") : (subject || "General");
@@ -59,3 +60,5 @@ export function CardBook({id, cover_i, title, author_name, subject, language}: C
         </section>
     );
 }
+
+export const CardBook = memo(CardBookComponent);
