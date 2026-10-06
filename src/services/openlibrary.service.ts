@@ -1,31 +1,15 @@
+const BASE_URL = import.meta.env.VITE_OPEN_LIBRARY_URL || "https://openlibrary.org";
 
-const BASE_URL = import.meta.env.VITE_OPEN_LIBRARY_URL;
+export interface OpenLibraryDoc {
+    key?: string;
+    title?: string;
+    author_name?: string[];
+    cover_i?: number;
+    subject?: string[];
+    language?: string[];
+}
 
-const options = {
-    method: 'GET',
-    headers: {
-        'Accept': 'application/json'
-    }
+export const openLibraryEndpoints = {
+    searchBooks: (query: string) => `${BASE_URL}/search.json?title=${encodeURIComponent(query)}`,
+    getBookDetails: (isbn: string) => `${BASE_URL}/works/${isbn}.json`,
 };
-
-export async function searchBooks(query: string) {
-    try {
-        const response = await fetch(`${BASE_URL}/search.json?title=${query}`, options);
-        const data = await response.json();
-        return data;
-    } catch (error) {
-        console.error('Error al buscar libros:', error);
-        throw error;
-    }
-}
-
-export async function getBookDetails(isbn: string) {
-    try {
-        const response = await fetch(`${BASE_URL}/ works / ${isbn}.json`, options);
-        const data = await response.json();
-        return data;
-    } catch (error) {
-        console.error('Error al obtener los detalles del libro:', error);
-        throw error;
-    }
-}
