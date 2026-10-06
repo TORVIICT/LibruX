@@ -25,7 +25,7 @@ $shadow-md: 0 4px 12px rgba(0, 0, 0, 0.08);
     margin-top: 10px;
     padding: 12px 18px;
     background-color: $primary-color;
-    color: #ffffff;
+    color: $bg-card;
     font-weight: 600;
     font-size: 0.875rem;
     letter-spacing: 0.03em;
@@ -93,7 +93,7 @@ $shadow-md: 0 4px 12px rgba(0, 0, 0, 0.08);
     &:hover {
         span:not(.toggle-icon) {
             background-color: $primary-color;
-            color: #ffffff;
+            color: $bg-card;
         }
     }
 }
@@ -124,28 +124,18 @@ $shadow-md: 0 4px 12px rgba(0, 0, 0, 0.08);
         flex-direction: row;
         justify-content: space-between;
         align-items: center;
-        padding: 8px 4px;
-        gap: 6px;
+        gap: 1px;
 
         li.star-item {
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            gap: 4px;
-            padding: 8px 6px;
             border-radius: 10px;
             cursor: pointer;
             transition: all 0.2s ease;
             flex: 1;
-
-            .star-number {
-                font-size: 0.85rem;
-                font-weight: 700;
-                color: $text-muted;
-                transition: color 0.2s ease;
-                line-height: 1;
-            }
+            padding: 0px;
 
             .star-icon {
                 font-size: 24px;
@@ -155,8 +145,7 @@ $shadow-md: 0 4px 12px rgba(0, 0, 0, 0.08);
             }
 
             &:hover {
-                background-color: #fef3c7;
-
+                
                 .star-number {
                     color: #d97706;
                 }
@@ -231,9 +220,6 @@ ul {
     }
 }
 
-
-
-/* Responsive Styles for Mobile Phones */
 @media (max-width: 768px) {
     .panel-filters {
         padding: 16px 20px;
@@ -245,7 +231,6 @@ ul {
             }
         }
 
-        /* Collapsed state on mobile by default when not .is-open */
         &:not(.is-open) {
             .tematic-category,
             .availability-category,
@@ -256,7 +241,6 @@ ul {
             }
         }
 
-        /* Expanded state on mobile */
         &.is-open {
             .title .toggle-icon {
                 transform: rotate(180deg);

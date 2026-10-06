@@ -56,7 +56,6 @@ export function FiltersComponent() {
                                 role="button"
                                 tabIndex={0}
                             >
-                                <span className="star-number">{star}</span>
                                 <span className="material-symbols-outlined star-icon">
                                     star
                                 </span>

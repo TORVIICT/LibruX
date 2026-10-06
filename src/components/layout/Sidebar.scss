@@ -7,16 +7,16 @@ $sidebar-shadow: rgba(15, 23, 42, 0.35);
 $bottombar-h: 60px;
 
 .sidebar {
-  position: absolute;
+  position: fixed;
   z-index: 1010;
   top: 0px;
   left: 0px;
-  bottom: 15px;
   border-radius: 16px;
   width: 56px;
+  height:98vh;
+  margin: 10px;
   background: $sidebar-bg;
   border: 1px solid $sidebar-border;
-  backdrop-filter: blur(12px);
   transition: width 0.45s ease;
   box-shadow: 0 18px 45px $sidebar-shadow;
 
@@ -112,7 +112,6 @@ $bottombar-h: 60px;
     position: relative;
     opacity: 1;
     background: rgba(15, 23, 42, 0.9);
-    backdrop-filter: blur(10px);
     padding: 8px 12px;
     border-radius: 6px;
     translate: 16px 0;
@@ -224,7 +223,6 @@ $bottombar-h: 60px;
   .sidebar:not(.open) nav > button:hover p {
     position: static;
     background: transparent;
-    backdrop-filter: none;
     padding: 0;
     border-radius: 0;
     translate: none;

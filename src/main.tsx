@@ -6,7 +6,7 @@ import App from './App.tsx'
 import { BrowserRouter } from 'react-router';
 
 createRoot(document.getElementById('root')!).render(
-  <StrictMode>
+  <StrictMode>                                                                                                                                                                                                                                                                                                                                                             
     <BrowserRouter>
       <App />
     </BrowserRouter>
