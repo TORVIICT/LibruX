@@ -3,14 +3,12 @@ import "./BookList.scss";
 import { openLibraryEndpoints } from "../../services/openlibrary.service";
 import { useFetch } from "../../hooks/useFetch";
 import { useMemo } from "react";
+import { useSearchContext } from "../../context/SearchContext";
 
-interface BookListProps {
-    query?: string;
-}
-
-export function BookList({ query = "technology" }: BookListProps) {
+export function BookList() {
+    const { search } = useSearchContext();
     const { data, loading, error } = useFetch(
-        openLibraryEndpoints.searchBooks(query));
+        openLibraryEndpoints.searchBooks(search || 'fantasy'));
 
     if (loading) return <div>Loading...</div>;
 

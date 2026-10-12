@@ -1,88 +1,120 @@
+import { useState, useEffect } from "react";
 import "./Dashboard.scss";
+import { loansService } from "../../services/loans.service";
+import type { Loan, LoanStatisticsSummary } from "../../services/loans.service";
+import { useAuth } from "../../context/AuthContext";
 
 export default function Dashboard() {
+  const { user } = useAuth();
+  const [loans, setLoans] = useState<Loan[]>([]);
+  const [stats, setStats] = useState<LoanStatisticsSummary | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    async function loadDashboardData() {
+      try {
+        setLoading(true);
+        const [loansData, statsData] = await Promise.all([
+          loansService.getUserLoans(),
+          loansService.getStatisticsSummary().catch(() => null),
+        ]);
+        setLoans(loansData.data || []);
+        if (statsData) setStats(statsData);
+      } catch (err) {
+        console.error("Error loading dashboard data:", err);
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    loadDashboardData();
+  }, []);
+
+  const userName = user?.user_metadata?.name || user?.email?.split('@')[0] || "User";
+  const activeLoansCount = stats?.activeLoans ?? loans.filter(l => l.status === 'ACTIVE' || l.status === 'RENEWED').length;
+
   return (
     <main className="dashboard-page">
       <section className="quick-stats">
-        <h1>Welcome {localStorage.getItem("user-name")}!</h1>
-        <p>You have {localStorage.getItem("user-books") || 0} books lent</p>
+        <h1>Welcome {userName}!</h1>
+        <p>You have {activeLoansCount} active books lent</p>
       </section>
+
       <section className="metrics">
         <article className="metric-all-books">
           <div className="title-img-metric">
-            <h3>All books</h3>
+            <h3>Total loans</h3>
             <span className="material-symbols-outlined">book_ribbon</span>
           </div>
-          <p>12321</p>
+          <p>{stats?.totalLoans ?? loans.length}</p>
         </article>
         <article className="metric-reading-in-progress">
           <div className="title-img-metric">
-            <h3>Reading in progress</h3>
+            <h3>Renewed</h3>
             <span className="material-symbols-outlined">seat_read</span>
           </div>
-          <p>5</p>
+          <p>{stats?.renewedLoans ?? 0}</p>
         </article>
         <article className="metric-loan-books">
           <div className="title-img-metric">
             <h3>Active loans</h3>
             <span className="material-symbols-outlined">bookmark_stacks</span>
           </div>
-          <p>40</p>
+          <p>{activeLoansCount}</p>
         </article>
         <article className="metric-goal-progress">
           <div className="title-img-metric">
-            <h3>Book goal</h3>
-            <span className="material-symbols-outlined">flag</span>
+            <h3>Overdue</h3>
+            <span className="material-symbols-outlined">warning</span>
           </div>
-          <p>50/50</p>
-          <progress className="book-goal" value="20" max="50"></progress>
+          <p>{stats?.overdueLoans ?? 0}</p>
+          <progress className="book-goal" value={stats?.overdueLoans || 0} max="5"></progress>
         </article>
       </section>
 
-
       <section className="workspace">
-
-
         <div className="list-of-loan-books">
-
           <div className="list-of-loan-books-header">
             <div className="list-of-loan-books-header-info">
               <h3>Loan Management</h3>
               <p>Tracking of physical copies under external custody</p>
             </div>
-            <span className="active-loans-count">40 active loans</span>
+            <span className="active-loans-count">{activeLoansCount} active loans</span>
           </div>
 
           <div className="list-of-loan-books-body">
-            <table>
-              <thead>
-                <tr>
-                  <th>Book</th>
-                  <th>Date of loan</th>
-                  <th>Limit date</th>
-                  <th>Status</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr>
-                  <td>Book 1</td>
-                  <td>12/12/2022</td>
-                  <td>19/12/2022</td>
-                  <td>Available</td>
-                </tr>
-                <tr>
-                  <td>Book 2</td>
-                  <td>13/12/2022</td>
-                  <td>19/12/2022</td>
-                  <td>Borrowed</td>
-                </tr>
-              </tbody>
-            </table>
+            {loading ? (
+              <p style={{ padding: '20px', textAlign: 'center' }}>Loading your loans...</p>
+            ) : loans.length === 0 ? (
+              <p style={{ padding: '20px', textAlign: 'center' }}>No active or past loans found.</p>
+            ) : (
+              <table>
+                <thead>
+                  <tr>
+                    <th>Book</th>
+                    <th>Date of loan</th>
+                    <th>Limit date</th>
+                    <th>Status</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {loans.map((loan) => (
+                    <tr key={loan.id}>
+                      <td>{loan.bookReference?.title || "Book Reference"}</td>
+                      <td>{new Date(loan.loanDate).toLocaleDateString()}</td>
+                      <td>{new Date(loan.dueDate).toLocaleDateString()}</td>
+                      <td>
+                        <span className={`status-badge status-${loan.status.toLowerCase()}`}>
+                          {loan.status}
+                        </span>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            )}
           </div>
-
-
         </div>
-
 
         <div className="library-insights">
           <div className="library-insights-header">
@@ -127,17 +159,6 @@ export default function Dashboard() {
                   <span className="material-symbols-outlined">bookmark</span>
                 </button>
               </li>
-              <li className="acquisition-item">
-                <div className="acquisition-avatar" style={{ backgroundColor: '#64748b' }}>EN</div>
-                <div className="acquisition-info">
-                  <h4>Pensar Rápido, Pensar Lento</h4>
-                  <p className="acquisition-author">Daniel Kahneman</p>
-                  <p className="acquisition-meta">Físico • Stand A-14</p>
-                </div>
-                <button className="bookmark-btn">
-                  <span className="material-symbols-outlined">bookmark</span>
-                </button>
-              </li>
             </ul>
           </div>
           <button className="explore-catalog-btn">
@@ -145,13 +166,7 @@ export default function Dashboard() {
             <span className="material-symbols-outlined">chevron_right</span>
           </button>
         </div>
-
-
       </section>
-
-
-
-
     </main>
   );
 }

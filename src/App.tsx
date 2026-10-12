@@ -1,11 +1,14 @@
 import { AppRoutes } from "./routing/Routes";
 import { AuthProvider } from "./context/AuthContext";
+import { SearchProvider } from "./context/SearchContext";
 
 function App() {
 
   return (
     <AuthProvider>
-      <AppRoutes />
+      <SearchProvider>
+        <AppRoutes />
+      </SearchProvider>
     </AuthProvider>
   );
 }

@@ -1,12 +1,20 @@
 import { useState } from "react";
 import "./Navbar.scss";
 import logo from "../../assets/Logo.png";
+import { useSearchContext } from "../../context/SearchContext";
 
 export const Navbar = () => {
-    const [query, setQuery] = useState("");
+    const {search, setSearch} = useSearchContext();
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(false);
     const [isMobileSearchActive, setIsMobileSearchActive] = useState(false);
+
+    const handleSearch = () => {
+        setLoading(true);
+        setError(false);
+        setSearch(search);
+        setLoading(false);
+    }
 
     return (
         <nav className={`navbar-container ${isMobileSearchActive ? 'mobile-search-open' : ''}`}>
@@ -27,8 +35,8 @@ export const Navbar = () => {
                     <input
                         type="text"
                         className="search-input"
-                        value={query}
-                        onChange={(e) => setQuery(e.target.value)}
+                        value={search}
+                        onChange={(e) => setSearch(e.target.value)}
                         placeholder="Search books..."
                     />
                     {loading && <span className="search-status">...</span>}
