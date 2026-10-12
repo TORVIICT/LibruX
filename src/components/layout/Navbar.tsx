@@ -2,6 +2,7 @@ import { useState } from "react";
 import "./Navbar.scss";
 import logo from "../../assets/Logo.png";
 import { useSearchContext } from "../../context/SearchContext";
+import { NotificationsDropdown } from "../Notifications/NotificationsDropdown";
 
 export const Navbar = () => {
     const {search, setSearch} = useSearchContext();
@@ -19,7 +20,7 @@ export const Navbar = () => {
     return (
         <nav className={`navbar-container ${isMobileSearchActive ? 'mobile-search-open' : ''}`}>
             <div className="navbar-brand">
-                <img className="navbar-logo" src={logo} alt="Logo de la aplicación" />
+                <img className="navbar-logo" src={logo} alt="Logo" />
                 <span className="navbar-title">Dashboard</span>
             </div>
 
@@ -51,14 +52,12 @@ export const Navbar = () => {
                 >
                     <span className="material-symbols-outlined">search</span>
                 </button>
-                <button className="action-button">
-                    <span className="material-symbols-outlined">notifications</span>
-                </button>
+                <NotificationsDropdown />
                 <div className="navbar-user">
                     <div className="avatar-placeholder">
                         <span className="material-symbols-outlined">person</span>
                     </div>
-                    <span className="navbar-username">{localStorage.getItem('user-name') || 'Usuario'}</span>
+                    <span className="navbar-username">{localStorage.getItem('user-name') || 'User'}</span>
                 </div>
             </div>
         </nav>

@@ -1,6 +1,8 @@
 import { memo, useState } from "react";
 import "./CardBook.scss";
 import { loansService } from "../../services/loans.service";
+import { SaveBookButton } from "../SaveBookButton/SaveBookButton";
+import { useNotifications } from "../../context/NotificationContext";
 
 export interface CardBookProps {
     id: number | string;
@@ -15,6 +17,7 @@ function CardBookComponent({id, cover_i, title, author_name, subject, language}:
     const [isRenting, setIsRenting] = useState(false);
     const [rentSuccess, setRentSuccess] = useState(false);
     const [error, setError] = useState<string | null>(null);
+    const { addNotification } = useNotifications();
 
     const coverImage = `https://covers.openlibrary.org/b/id/${cover_i}-M.jpg`;
     const formattedAuthor = Array.isArray(author_name) ? author_name.slice(0, 2).join(", ") : (author_name || "Unknown Author");
@@ -38,6 +41,12 @@ function CardBookComponent({id, cover_i, title, author_name, subject, language}:
             });
 
             setRentSuccess(true);
+            addNotification({
+                title: 'Préstamo solicitado',
+                message: `Has solicitado "${title}" exitosamente.`,
+                type: 'success',
+                link: '/loans',
+            });
             setTimeout(() => setRentSuccess(false), 4000);
         } catch (err: any) {
             setError(err.message || 'Could not request loan');
@@ -52,13 +61,18 @@ function CardBookComponent({id, cover_i, title, author_name, subject, language}:
             <div className="cardBook-info">
                 <div className="img-container">
                     <img 
-                        src={coverImage} 
-                        alt={title} 
-                        onError={(e) => {
-                            (e.target as HTMLImageElement).src = "https://images.unsplash.com/photo-1543002588-bfa74002ed7e?w=400&q=80";
-                        }}
+                        src={coverImage}
+                        alt={title}
                     />
-                    <span className="material-symbols-outlined">bookmark</span>
+                    <SaveBookButton
+                        id={id}
+                        title={title}
+                        author_name={author_name}
+                        cover_i={cover_i}
+                        subject={subject}
+                        language={language}
+                        className="card-bookmark-btn"
+                    />
                 </div>
 
                 <div>

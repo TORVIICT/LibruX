@@ -56,14 +56,15 @@ $shadow-hover: 0 12px 28px rgba(15, 23, 42, 0.12);
             transition: transform 0.4s ease;
         }
 
-        .material-symbols-outlined {
+        .card-bookmark-btn,
+        .material-symbols-outlined:not(.card-bookmark-btn .material-symbols-outlined) {
             position: absolute;
             top: 10px;
             right: 10px;
-            width: 34px;
-            height: 34px;
+            width: 36px;
+            height: 36px;
             border-radius: 50%;
-            background: rgba(255, 255, 255, 0.85);
+            background: rgba(255, 255, 255, 0.9);
             backdrop-filter: blur(8px);
             color: #64748b;
             display: flex;
@@ -72,15 +73,24 @@ $shadow-hover: 0 12px 28px rgba(15, 23, 42, 0.12);
             font-size: 20px;
             cursor: pointer;
             transition: all 0.2s ease;
-            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
+            border: 1px solid rgba(255, 255, 255, 0.6);
+            z-index: 2;
 
             &:hover {
                 background: #ffffff;
                 color: $primary-color;
                 transform: scale(1.1);
             }
+
+            &.saved {
+                background: #eff6ff;
+                border-color: #bfdbfe;
+                color: $primary-color;
+            }
         }
     }
+
 
     > div:not(.img-container):not(.cardBook-info-text) {
         display: flex;
@@ -134,7 +144,6 @@ $shadow-hover: 0 12px 28px rgba(15, 23, 42, 0.12);
         margin: 0 0 2px 0;
         line-height: 1.35;
         display: -webkit-box;
-        -webkit-line-clamp: 2;
         -webkit-box-orient: vertical;
         overflow: hidden;
         text-overflow: ellipsis;

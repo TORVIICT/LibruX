@@ -7,9 +7,12 @@ export interface OpenLibraryDoc {
     cover_i?: number;
     subject?: string[];
     language?: string[];
+    first_publish_year?: number;
+    edition_count?: number;
 }
 
 export const openLibraryEndpoints = {
     searchBooks: (query: string) => `${BASE_URL}/search.json?title=${encodeURIComponent(query)}`,
     getBookDetails: (isbn: string) => `${BASE_URL}/works/${isbn}.json`,
+    getRecentBooks: (limit: number = 5) => `${BASE_URL}/search.json?q=book&sort=new&limit=${limit}`,
 };

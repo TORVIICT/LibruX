@@ -1,0 +1,96 @@
+.list-of-loan-books-body {
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 4px 12px rgba(30, 64, 175, 0.06);
+
+    table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 14px;
+
+        thead {
+            background: linear-gradient(135deg, #1e40af 0%, #2d52c4 100%);
+
+            tr {
+                th {
+                    padding: 14px 20px;
+                    text-align: left;
+                    color: #f8fafc;
+                    font-weight: 600;
+                    font-size: 13px;
+                    letter-spacing: 0.04em;
+                    text-transform: uppercase;
+                    white-space: nowrap;
+
+                    &:first-child {
+                        border-radius: 0;
+                    }
+
+                    &:last-child {
+                        border-radius: 0;
+                    }
+                }
+            }
+        }
+
+        tbody {
+            tr {
+                transition: background-color 0.2s ease, transform 0.15s ease;
+                border-bottom: 1px solid #eef2f7;
+
+                &:last-child {
+                    border-bottom: none;
+                }
+
+                &:nth-child(even) {
+                    background-color: #f8fafc;
+                }
+
+                &:nth-child(odd) {
+                    background-color: #ffffff;
+                }
+
+                &:hover {
+                    background-color: #eef3ff;
+                    cursor: pointer;
+                }
+
+                td {
+                    padding: 14px 20px;
+                    color: #334155;
+                    font-weight: 400;
+                    vertical-align: middle;
+
+                    &:first-child {
+                        font-weight: 600;
+                        color: #0B1C30;
+                    }
+
+                    &:last-child {
+                        font-weight: 500;
+                    }
+                }
+            }
+        }
+    }
+}
+
+@media (max-width: 480px) {
+
+    .list-of-loan-books-body {
+        border-radius: 8px;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+
+        table {
+
+            thead tr th,
+            tbody tr td {
+                padding: 10px 8px;
+                font-size: 12px;
+            }
+        }
+    }
+
+}

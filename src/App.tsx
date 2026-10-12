@@ -1,14 +1,17 @@
 import { AppRoutes } from "./routing/Routes";
 import { AuthProvider } from "./context/AuthContext";
 import { SearchProvider } from "./context/SearchContext";
+import { NotificationProvider } from "./context/NotificationContext";
 
 function App() {
 
   return (
     <AuthProvider>
-      <SearchProvider>
-        <AppRoutes />
-      </SearchProvider>
+      <NotificationProvider>
+        <SearchProvider>
+          <AppRoutes />
+        </SearchProvider>
+      </NotificationProvider>
     </AuthProvider>
   );
 }
