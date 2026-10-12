@@ -20,7 +20,7 @@ export function BookList() {
 
     return (
         <div className="container-book-list">
-            {books.map((book) => (
+            {books.map((book: any) => (
                 <CardBook
                     key={book.id}
                     id={book.id}

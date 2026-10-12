@@ -48,6 +48,8 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         setSession(null);
         setUser(null);
         setIsAuthenticated(false);
+        localStorage.removeItem("auth-token");
+        localStorage.removeItem("user-name");
     };
 
     return (

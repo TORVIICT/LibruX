@@ -2,7 +2,6 @@ import { supabase } from '../lib/supabase';
 
 export type LoanStatus = 'ACTIVE' | 'RETURNED' | 'OVERDUE' | 'RENEWED' | 'CANCELLED';
 
-// Interfaces con camelCase para mantener compatibilidad con los componentes existentes
 export interface BookReference {
   id: string;
   openLibraryKey: string;
@@ -55,8 +54,6 @@ export interface LoanStatisticsSummary {
   averageLoanDurationDays: number;
 }
 
-// ─── Mapeo snake_case (Supabase) → camelCase (Frontend) ───
-
 function mapBookReference(raw: any): BookReference | undefined {
   if (!raw) return undefined;
   return {
@@ -91,8 +88,6 @@ function mapLoan(raw: any): Loan {
     updatedAt: raw.updated_at,
   };
 }
-
-// ─── Helper para invocar Edge Functions ───
 
 const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL;
 
@@ -142,8 +137,6 @@ async function invokeEdgeFunction<T = any>(
 
   return data;
 }
-
-// ─── Servicio de Préstamos (Supabase Edge Functions) ───
 
 export const loansService = {
   // 1. Obtener préstamos del usuario autenticado

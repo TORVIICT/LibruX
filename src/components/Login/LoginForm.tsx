@@ -11,7 +11,14 @@ type LoginData = {
 
 type FormErrors = Record<string, string>;
 
-export const LoginForm = ({ view, toggleView, saveToken, getAuthErrorMessage }) => {
+interface LoginFormProps {
+  view: string;
+  toggleView: () => void;
+  saveToken: (token: string) => void;
+  getAuthErrorMessage: (message: string) => string;
+}
+
+export const LoginForm = ({ view, toggleView, saveToken, getAuthErrorMessage }: LoginFormProps) => {
   const [data, setData] = useState<LoginData>({ email: "", password: "" });
   const [errors, setErrors] = useState<FormErrors>({});
   const [submitted, setSubmitted] = useState(false);

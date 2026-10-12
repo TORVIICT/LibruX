@@ -1,6 +1,7 @@
 import { useState } from "react";
 import "./Sidebar.scss";
 import { useNavigate } from "react-router";
+import { useAuth } from "../../context/AuthContext";
 
 const navDicItems = {
   home: "Home",
@@ -19,8 +20,6 @@ const switchView = (view: string) => {
       return "/loans";
     case "Saved books":
       return "/saved-books";
-    case "logout":
-      return "/";
     default:
       return "/";
   }
@@ -29,6 +28,12 @@ const switchView = (view: string) => {
 export const Sidebar = () => {
   const [isOpen, setIsOpen] = useState(false);
   const navegate = useNavigate();
+  const { logout } = useAuth();
+
+  const handleLogout = async () => {
+    await logout();
+    navegate("/");
+  };
   
   return (
     <aside className={`sidebar ${isOpen ? "open" : ""}`}>
@@ -53,7 +58,7 @@ export const Sidebar = () => {
               <p>{item}</p>
             </button>
           ))}
-          <button type="button" onClick={() => navegate(switchView("logout"))}>
+          <button type="button" onClick={handleLogout}>
             <span className="material-symbols-outlined">logout</span>
             <p>Logout</p>
           </button>

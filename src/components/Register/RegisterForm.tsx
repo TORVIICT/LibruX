@@ -11,7 +11,14 @@ type RegisterData = {
   password: string;
 };
 
-export const RegisterForm = ({ view, toggleView, saveToken, getAuthErrorMessage }) => {
+interface RegisterFormProps {
+  view: string;
+  toggleView: () => void;
+  saveToken: (token: string) => void;
+  getAuthErrorMessage: (message: string) => string;
+}
+
+export const RegisterForm = ({ view, toggleView, saveToken, getAuthErrorMessage }: RegisterFormProps) => {
   const [data, setData] = useState<RegisterData>({
     name: "",
     email: "",

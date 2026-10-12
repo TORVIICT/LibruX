@@ -31,7 +31,7 @@ export const Navbar = () => {
                     >
                         <span className="material-symbols-outlined">arrow_back</span>
                     </button>
-                    <span className="material-symbols-outlined search-icon">search</span>
+                    <span className="material-symbols-outlined search-icon" onClick={handleSearch}>search</span>
                     <input
                         type="text"
                         className="search-input"

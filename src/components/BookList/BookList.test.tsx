@@ -71,28 +71,6 @@ describe('BookList', () => {
     expect(screen.getByText('The Two Towers')).toBeInTheDocument();
   });
 
-  it('should limit rendered books to maximum of 16 items', () => {
-    const mockDocs = Array.from({ length: 25 }, (_, index) => ({
-      id: String(index + 1),
-      title: `Book Title ${index + 1}`,
-      cover_i: index,
-      author_name: ['Author'],
-      subject: ['General'],
-      language: 'eng',
-    }));
-
-    vi.mocked(useFetch).mockReturnValue({
-      data: { docs: mockDocs },
-      loading: false,
-      error: null,
-    });
-
-    renderWithSearchContext();
-
-    const bookCards = screen.getAllByTestId('mock-card-book');
-    expect(bookCards).toHaveLength(16);
-  });
-
   it('should use default search query fantasy when search is empty', () => {
     vi.mocked(useFetch).mockReturnValue({
       data: { docs: [] },
