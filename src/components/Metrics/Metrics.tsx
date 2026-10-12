@@ -1,6 +1,13 @@
 import './Metrics.scss';
+import type { Loan, LoanStatisticsSummary } from "../../services/loans.service";
 
-export default function Metrics({ stats, loans, activeLoansCount }) {
+interface MetricsProps {
+    stats: LoanStatisticsSummary | null;
+    loans: Loan[];
+    activeLoansCount: number;
+}
+
+export default function Metrics({ stats, loans, activeLoansCount }: MetricsProps) {
     return (
         <section className="metrics">
             <article className="metric-all-books">
