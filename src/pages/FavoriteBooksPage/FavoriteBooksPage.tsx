@@ -35,7 +35,7 @@ export default function FavoriteBooksPage() {
           </div>
           <div className="header-text">
             <h1>Saved Books</h1>
-            <p>Tu colección personal de libros guardados y referencias de biblioteca</p>
+            <p>Your personal collection of saved books and library references</p>
           </div>
         </div>
 
@@ -44,14 +44,14 @@ export default function FavoriteBooksPage() {
             <span className="material-symbols-outlined">auto_stories</span>
             <span>{savedBooks.length} {savedBooks.length === 1 ? "libro" : "libros"}</span>
           </div>
-          <button 
-            type="button" 
-            className="refresh-btn" 
+          <button
+            type="button"
+            className="refresh-btn"
             onClick={loadSavedBooks}
             title="Recargar guardados"
           >
             <span className="material-symbols-outlined">refresh</span>
-            <span>Actualizar</span>
+            <span>Refresh</span>
           </button>
         </div>
       </header>
@@ -59,25 +59,25 @@ export default function FavoriteBooksPage() {
       {loading ? (
         <div className="loading-state">
           <span className="material-symbols-outlined spinner">autorenew</span>
-          <p>Cargando tus libros guardados...</p>
+          <p>Loading your saved books...</p>
         </div>
       ) : savedBooks.length === 0 ? (
         <div className="empty-state">
           <div className="empty-icon-wrap">
             <span className="material-symbols-outlined">bookmark_border</span>
           </div>
-          <h3>No tienes libros guardados aún</h3>
+          <h3>You don't have any saved books yet</h3>
           <p>
-            Explora el catálogo o las nuevas adquisiciones y haz clic en el ícono de
-            guardar para tener tus referencias favoritas siempre a mano.
+            Explore the catalog or new acquisitions and click the save icon
+            to keep your favorite references always at hand.
           </p>
-          <button 
-            type="button" 
+          <button
+            type="button"
             className="explore-btn"
             onClick={() => navigate("/books")}
           >
             <span className="material-symbols-outlined">explore</span>
-            <span>Explorar catálogo</span>
+            <span>Explore catalog</span>
           </button>
         </div>
       ) : (
