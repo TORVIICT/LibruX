@@ -98,4 +98,82 @@ describe('BookList', () => {
       expect.stringContaining('title=react%20design')
     );
   });
+
+  it('should query API by subject when category filter is provided', () => {
+    vi.mocked(useFetch).mockReturnValue({
+      data: { docs: [] },
+      loading: false,
+      error: null,
+    });
+
+    render(
+      <SearchContext.Provider value={{ search: '', setSearch: vi.fn() }}>
+        <BookList
+          filters={{
+            categories: ['technology'],
+            availability: 'all',
+            minRating: 0,
+            languages: [],
+          }}
+        />
+      </SearchContext.Provider>
+    );
+
+    expect(useFetch).toHaveBeenCalledWith(
+      expect.stringContaining('subject=technology')
+    );
+  });
+
+  it('should query API with language code when language filter is provided', () => {
+    vi.mocked(useFetch).mockReturnValue({
+      data: { docs: [] },
+      loading: false,
+      error: null,
+    });
+
+    render(
+      <SearchContext.Provider value={{ search: '', setSearch: vi.fn() }}>
+        <BookList
+          filters={{
+            categories: [],
+            availability: 'all',
+            minRating: 0,
+            languages: ['spanish'],
+          }}
+        />
+      </SearchContext.Provider>
+    );
+
+    expect(useFetch).toHaveBeenCalledWith(
+      expect.stringContaining('language=spa')
+    );
+  });
+
+  it('should combine title search and subject category in API query', () => {
+    vi.mocked(useFetch).mockReturnValue({
+      data: { docs: [] },
+      loading: false,
+      error: null,
+    });
+
+    render(
+      <SearchContext.Provider value={{ search: 'clean', setSearch: vi.fn() }}>
+        <BookList
+          filters={{
+            categories: ['science'],
+            availability: 'all',
+            minRating: 0,
+            languages: [],
+          }}
+        />
+      </SearchContext.Provider>
+    );
+
+    expect(useFetch).toHaveBeenCalledWith(
+      expect.stringContaining('title=clean')
+    );
+    expect(useFetch).toHaveBeenCalledWith(
+      expect.stringContaining('subject=science')
+    );
+  });
 });

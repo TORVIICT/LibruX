@@ -12,174 +12,197 @@ export interface BookToSave {
   availableCopies?: number;
 }
 
-export const booksService = {
-  /**
-   * Obtiene todos los libros guardados en la base de datos (book_references)
-   */
-  async getSavedBooks(): Promise<BookReference[]> {
-    const { data, error } = await supabase
-      .from('book_references')
-      .select('*')
-      .order('created_at', { ascending: false });
+interface BookReferenceRow {
+  id: string;
+  open_library_key: string;
+  title: string;
+  author_name: string[] | null;
+  cover_id: number | null;
+  subject: string[] | null;
+  language: string | null;
+  total_copies: number | null;
+  available_copies: number | null;
+}
 
-    if (error) {
-      console.warn('Error fetching saved books from Supabase:', error.message);
-      // Fallback a almacenamiento local si la política RLS aún no está activa
-      const local = localStorage.getItem('librux_saved_books_backup');
-      return local ? JSON.parse(local) : [];
+const PRIMARY_STORAGE_KEY = 'librux_saved_books';
+const LEGACY_STORAGE_KEY = 'librux_saved_books_backup';
+
+function getLocalSavedBooks(): BookReference[] {
+  try {
+    const primary = localStorage.getItem(PRIMARY_STORAGE_KEY);
+    if (primary) {
+      return JSON.parse(primary);
+    }
+    const legacy = localStorage.getItem(LEGACY_STORAGE_KEY);
+    if (legacy) {
+      return JSON.parse(legacy);
+    }
+  } catch {
+    return [];
+  }
+  return [];
+}
+
+function setLocalSavedBooks(books: BookReference[]): void {
+  try {
+    localStorage.setItem(PRIMARY_STORAGE_KEY, JSON.stringify(books));
+  } catch (error: unknown) {
+    void error;
+  }
+}
+
+export const booksService = {
+  async getSavedBooks(): Promise<BookReference[]> {
+    const localBooks = getLocalSavedBooks();
+    let dbBooks: BookReference[] = [];
+
+    try {
+      const { data, error } = await supabase
+        .from('book_references')
+        .select('*')
+        .order('created_at', { ascending: false })
+        .returns<BookReferenceRow[]>();
+
+      if (!error && data) {
+        dbBooks = data.map((raw) => ({
+          id: raw.id,
+          openLibraryKey: raw.open_library_key,
+          title: raw.title,
+          authorName: raw.author_name || [],
+          coverId: raw.cover_id || 0,
+          subject: raw.subject || [],
+          language: raw.language || 'eng',
+          totalCopies: raw.total_copies ?? 5,
+          availableCopies: raw.available_copies ?? 5,
+        }));
+      }
+    } catch {
+      dbBooks = [];
     }
 
-    const mapped: BookReference[] = (data || []).map((raw) => ({
-      id: raw.id,
-      openLibraryKey: raw.open_library_key,
-      title: raw.title,
-      authorName: raw.author_name || [],
-      coverId: raw.cover_id || 0,
-      subject: raw.subject || [],
-      language: raw.language || 'eng',
-      totalCopies: raw.total_copies ?? 5,
-      availableCopies: raw.available_copies ?? 5,
-    }));
+    const bookMap = new Map<string, BookReference>();
 
-    // Sincronizar respaldo local
-    localStorage.setItem('librux_saved_books_backup', JSON.stringify(mapped));
-    return mapped;
+    dbBooks.forEach((book) => {
+      const normalizedKey = book.openLibraryKey.replace('/works/', '');
+      bookMap.set(normalizedKey, book);
+    });
+
+    localBooks.forEach((book) => {
+      const normalizedKey = book.openLibraryKey.replace('/works/', '');
+      bookMap.set(normalizedKey, book);
+    });
+
+    const mergedBooks = Array.from(bookMap.values());
+    setLocalSavedBooks(mergedBooks);
+    return mergedBooks;
   },
 
-  /**
-   * Verifica si un libro está guardado por su openLibraryKey
-   */
   async isBookSaved(openLibraryKey: string): Promise<boolean> {
     const cleanKey = openLibraryKey.replace('/works/', '');
-    const { data, error } = await supabase
-      .from('book_references')
-      .select('id, open_library_key')
-      .or(`open_library_key.eq.${openLibraryKey},open_library_key.eq.${cleanKey}`)
-      .limit(1);
+    const localBooks = getLocalSavedBooks();
+    const inLocal = localBooks.some(
+      (b) =>
+        b.openLibraryKey === openLibraryKey ||
+        b.openLibraryKey === cleanKey ||
+        b.openLibraryKey.replace('/works/', '') === cleanKey
+    );
 
-    if (error) {
-      const local = localStorage.getItem('librux_saved_books_backup');
-      if (local) {
-        const books: BookReference[] = JSON.parse(local);
-        return books.some(b => b.openLibraryKey === openLibraryKey || b.openLibraryKey === cleanKey);
-      }
-      return false;
+    if (inLocal) {
+      return true;
     }
 
-    return (data && data.length > 0);
+    try {
+      const { data } = await supabase
+        .from('book_references')
+        .select('id, open_library_key')
+        .or(`open_library_key.eq.${openLibraryKey},open_library_key.eq.${cleanKey}`)
+        .limit(1);
+
+      return Boolean(data && data.length > 0);
+    } catch {
+      return false;
+    }
   },
 
-  /**
-   * Guarda la referencia del libro en la base de datos Supabase
-   */
   async saveBookReference(book: BookToSave): Promise<BookReference> {
-    const key = book.openLibraryKey;
+    const rawKey = book.openLibraryKey;
+    const cleanKey = rawKey.replace('/works/', '');
     const authorName = Array.isArray(book.authorName) ? book.authorName : [book.authorName || 'Desconocido'];
     const subject = Array.isArray(book.subject) ? book.subject : [book.subject || 'General'];
 
-    // 1. Verificar si ya existe
-    const { data: existing } = await supabase
-      .from('book_references')
-      .select('*')
-      .eq('open_library_key', key)
-      .maybeSingle();
-
-    if (existing) {
-      return {
-        id: existing.id,
-        openLibraryKey: existing.open_library_key,
-        title: existing.title,
-        authorName: existing.author_name || [],
-        coverId: existing.cover_id || 0,
-        subject: existing.subject || [],
-        language: existing.language || 'eng',
-        totalCopies: existing.total_copies ?? 5,
-        availableCopies: existing.available_copies ?? 5,
-      };
-    }
-
-    // 2. Insertar nueva referencia en Supabase
-    const { data, error } = await supabase
-      .from('book_references')
-      .insert({
-        open_library_key: key,
-        title: book.title,
-        author_name: authorName,
-        cover_id: book.coverId || 0,
-        subject: subject,
-        language: book.language || 'eng',
-        total_copies: book.totalCopies ?? 5,
-        available_copies: book.availableCopies ?? 5,
-      })
-      .select()
-      .single();
-
-    if (error) {
-      console.warn('Supabase RLS/Insert warning:', error.message);
-      // Si falla por RLS, guardamos localmente como resguardo transparente
-      const fallbackBook: BookReference = {
-        id: `local-${Date.now()}`,
-        openLibraryKey: key,
-        title: book.title,
-        authorName,
-        coverId: book.coverId || 0,
-        subject,
-        language: book.language || 'eng',
-        totalCopies: 5,
-        availableCopies: 5,
-      };
-
-      const local = localStorage.getItem('librux_saved_books_backup');
-      const books: BookReference[] = local ? JSON.parse(local) : [];
-      if (!books.some(b => b.openLibraryKey === key)) {
-        books.unshift(fallbackBook);
-        localStorage.setItem('librux_saved_books_backup', JSON.stringify(books));
-      }
-      return fallbackBook;
-    }
-
-    const savedBook: BookReference = {
-      id: data.id,
-      openLibraryKey: data.open_library_key,
-      title: data.title,
-      authorName: data.author_name || [],
-      coverId: data.cover_id || 0,
-      subject: data.subject || [],
-      language: data.language || 'eng',
-      totalCopies: data.total_copies ?? 5,
-      availableCopies: data.available_copies ?? 5,
+    const targetBook: BookReference = {
+      id: `saved-${cleanKey}`,
+      openLibraryKey: cleanKey,
+      title: book.title,
+      authorName,
+      coverId: book.coverId || 0,
+      subject,
+      language: book.language || 'eng',
+      totalCopies: book.totalCopies ?? 5,
+      availableCopies: book.availableCopies ?? 5,
     };
 
-    // Actualizar respaldo local
-    const local = localStorage.getItem('librux_saved_books_backup');
-    const books: BookReference[] = local ? JSON.parse(local) : [];
-    if (!books.some(b => b.openLibraryKey === key)) {
-      books.unshift(savedBook);
-      localStorage.setItem('librux_saved_books_backup', JSON.stringify(books));
+    const currentBooks = getLocalSavedBooks();
+    const existingIndex = currentBooks.findIndex(
+      (b) =>
+        b.openLibraryKey === cleanKey ||
+        b.openLibraryKey === rawKey ||
+        b.openLibraryKey.replace('/works/', '') === cleanKey
+    );
+
+    if (existingIndex >= 0) {
+      currentBooks[existingIndex] = { ...currentBooks[existingIndex], ...targetBook };
+    } else {
+      currentBooks.unshift(targetBook);
+    }
+    setLocalSavedBooks(currentBooks);
+
+    try {
+      const { data: existing } = await supabase
+        .from('book_references')
+        .select('*')
+        .or(`open_library_key.eq.${rawKey},open_library_key.eq.${cleanKey}`)
+        .maybeSingle();
+
+      if (!existing) {
+        await supabase
+          .from('book_references')
+          .insert({
+            open_library_key: cleanKey,
+            title: book.title,
+            author_name: authorName,
+            cover_id: book.coverId || 0,
+            subject,
+            language: book.language || 'eng',
+            total_copies: book.totalCopies ?? 5,
+            available_copies: book.availableCopies ?? 5,
+          });
+      }
+    } catch (error: unknown) {
+      void error;
     }
 
-    return savedBook;
+    return targetBook;
   },
 
-  /**
-   * Elimina un libro guardado de la base de datos
-   */
   async removeBookReference(openLibraryKey: string): Promise<boolean> {
-    const { error } = await supabase
-      .from('book_references')
-      .delete()
-      .eq('open_library_key', openLibraryKey);
+    const cleanKey = openLibraryKey.replace('/works/', '');
+    const currentBooks = getLocalSavedBooks();
+    const filtered = currentBooks.filter(
+      (b) =>
+        b.openLibraryKey !== openLibraryKey &&
+        b.openLibraryKey !== cleanKey &&
+        b.openLibraryKey.replace('/works/', '') !== cleanKey
+    );
+    setLocalSavedBooks(filtered);
 
-    // Actualizar respaldo local independientemente
-    const local = localStorage.getItem('librux_saved_books_backup');
-    if (local) {
-      const books: BookReference[] = JSON.parse(local);
-      const filtered = books.filter(b => b.openLibraryKey !== openLibraryKey);
-      localStorage.setItem('librux_saved_books_backup', JSON.stringify(filtered));
-    }
-
-    if (error) {
-      console.warn('Error deleting book reference from Supabase:', error.message);
+    try {
+      await supabase
+        .from('book_references')
+        .delete()
+        .or(`open_library_key.eq.${openLibraryKey},open_library_key.eq.${cleanKey}`);
+    } catch (error: unknown) {
+      void error;
     }
 
     return true;

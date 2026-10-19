@@ -34,22 +34,24 @@
   }
 
   &.saved {
-    background-color: #eff6ff;
-    border-color: #93c5fd;
-    color: #1e40af;
+    background-color: #dbeafe;
+    border-color: #2563eb;
+    color: #1d4ed8;
 
+    .material-symbols-outlined,
     .icon-filled {
-      font-variation-settings: 'FILL' 1;
-      color: #1e40af;
+      font-variation-settings: 'FILL' 1, 'wght' 600;
+      color: #1d4ed8 !important;
     }
 
     &:hover:not(:disabled) {
-      background-color: #fee2e2;
-      border-color: #fca5a5;
-      color: #dc2626;
+      background-color: #bfdbfe;
+      border-color: #1d4ed8;
+      color: #1e40af;
 
+      .material-symbols-outlined,
       .icon-filled {
-        color: #dc2626;
+        color: #1d4ed8 !important;
       }
     }
   }

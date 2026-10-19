@@ -1,7 +1,8 @@
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { MemoryRouter } from 'react-router';
 import { CardBook } from './CardBook';
-import { loansService } from '../../services/loans.service';
+import { loansService, type Loan } from '../../services/loans.service';
 
 vi.mock('../../services/loans.service', () => ({
   loansService: {
@@ -19,13 +20,17 @@ describe('CardBook', () => {
     language: 'English',
   };
 
+  const renderWithRouter = (ui: React.ReactElement) => {
+    return render(<MemoryRouter>{ui}</MemoryRouter>);
+  };
+
   beforeEach(() => {
     vi.clearAllMocks();
     vi.spyOn(window, 'alert').mockImplementation(() => {});
   });
 
   it('should render book details correctly', () => {
-    render(<CardBook {...defaultProps} />);
+    renderWithRouter(<CardBook {...defaultProps} />);
 
     expect(screen.getByRole('heading', { level: 4, name: 'The Hobbit' })).toBeInTheDocument();
     expect(screen.getByText('J.R.R. Tolkien')).toBeInTheDocument();
@@ -37,7 +42,7 @@ describe('CardBook', () => {
   });
 
   it('should handle fallback author and subject when empty', () => {
-    render(
+    renderWithRouter(
       <CardBook
         id="OL999"
         cover_i={0}
@@ -52,9 +57,9 @@ describe('CardBook', () => {
   });
 
   it('should trigger createLoan and display rented state on click', async () => {
-    vi.mocked(loansService.createLoan).mockResolvedValueOnce({} as any);
+    vi.mocked(loansService.createLoan).mockResolvedValueOnce({} as Loan);
 
-    render(<CardBook {...defaultProps} />);
+    renderWithRouter(<CardBook {...defaultProps} />);
 
     const rentButton = screen.getByRole('button', { name: /rent/i });
     expect(rentButton).toBeInTheDocument();
@@ -84,7 +89,7 @@ describe('CardBook', () => {
   it('should display error message when createLoan fails', async () => {
     vi.mocked(loansService.createLoan).mockRejectedValueOnce(new Error('Loan quota exceeded'));
 
-    render(<CardBook {...defaultProps} />);
+    renderWithRouter(<CardBook {...defaultProps} />);
 
     const rentButton = screen.getByRole('button', { name: /rent/i });
     fireEvent.click(rentButton);
@@ -96,7 +101,7 @@ describe('CardBook', () => {
   });
 
   it('should fallback image source on image load error', () => {
-    render(<CardBook {...defaultProps} />);
+    renderWithRouter(<CardBook {...defaultProps} />);
 
     const img = screen.getByRole('img', { name: 'The Hobbit' });
     fireEvent.error(img);

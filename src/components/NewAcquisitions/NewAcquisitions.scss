@@ -49,6 +49,24 @@ $tittle-color: #0B1C30;
     }
 
     .library-insights-body {
+        .acquisitions-loading,
+        .acquisitions-error,
+        .acquisitions-empty {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            padding: 32px 16px;
+            color: #64748b;
+            font-size: 14px;
+            text-align: center;
+
+            .material-symbols-outlined {
+                font-size: 20px;
+                animation: spin 1s linear infinite;
+            }
+        }
+
         .acquisitions-list {
             list-style: none;
             margin: 0;
@@ -73,10 +91,47 @@ $tittle-color: #0B1C30;
                     border-radius: 10px;
                 }
 
-                img {
-                    width: 44px;
-                    height: 44px;
-                    min-width: 44px;
+                .acquisition-cover-wrap {
+                    position: relative;
+                    width: 34px;
+                    height: 48px;
+                    min-width: 34px;
+                    flex-shrink: 0;
+
+                    .acquisition-cover {
+                        width: 100%;
+                        height: 100%;
+                        object-fit: cover;
+                        border-radius: 4px;
+                        border: 1px solid #e2e8f0;
+                        box-shadow: 0 1px 3px rgba(15, 23, 42, 0.08);
+                        background-color: #f1f5f9;
+                        display: block;
+
+                        &.is-hidden {
+                            display: none;
+                        }
+                    }
+
+                    .acquisition-cover-placeholder {
+                        width: 100%;
+                        height: 100%;
+                        border-radius: 4px;
+                        border: 1px solid #e2e8f0;
+                        background-color: #f1f5f9;
+                        display: flex;
+                        align-items: center;
+                        justify-content: center;
+                        color: #94a3b8;
+
+                        &.is-hidden {
+                            display: none;
+                        }
+
+                        .material-symbols-outlined {
+                            font-size: 18px;
+                        }
+                    }
                 }
 
                 .acquisition-info {
@@ -208,12 +263,10 @@ $tittle-color: #0B1C30;
             gap: 10px;
             padding: 10px 2px;
 
-            .acquisition-avatar {
-                width: 36px;
-                height: 36px;
-                min-width: 36px;
-                font-size: 11px;
-                border-radius: 8px;
+            .acquisition-cover-wrap {
+                width: 28px;
+                height: 40px;
+                min-width: 28px;
             }
 
             .acquisition-info {
@@ -245,5 +298,13 @@ $tittle-color: #0B1C30;
             border-radius: 10px;
         }
     }
+}
 
+@keyframes spin {
+    from {
+        transform: rotate(0deg);
+    }
+    to {
+        transform: rotate(360deg);
+    }
 }

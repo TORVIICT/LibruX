@@ -60,4 +60,20 @@
             color: #ef4444;
         }
     }
+
+    .btn-clear-filters {
+        padding: 8px 18px;
+        background-color: #1e40af;
+        color: #ffffff;
+        border: none;
+        border-radius: 8px;
+        font-size: 0.875rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: background-color 0.2s ease;
+
+        &:hover {
+            background-color: #1d4ed8;
+        }
+    }
 }

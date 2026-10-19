@@ -39,7 +39,7 @@ function SaveBookButtonComponent({
         const saved = await booksService.isBookSaved(key);
         if (isMounted) setIsSaved(saved);
       } catch {
-        console.log("Error in checkStatus savebookbutton");
+        if (isMounted) setIsSaved(false);
       }
     }
     if (key) {
@@ -84,7 +84,7 @@ function SaveBookButtonComponent({
             link: "/saved-books",
           });
         }
-      } catch (err: any) {
+      } catch (err: unknown) {
         console.error("Error at savebookbutton", err);
       } finally {
         setLoading(false);

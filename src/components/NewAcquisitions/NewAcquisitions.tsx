@@ -1,14 +1,17 @@
 import { useNavigate } from "react-router";
 import { useFetch } from "../../hooks/useFetch";
-import { openLibraryEndpoints } from "../../services/openlibrary.service";
+import { openLibraryEndpoints, type OpenLibraryDoc } from "../../services/openlibrary.service";
 import { SaveBookButton } from "../SaveBookButton/SaveBookButton";
 import "./NewAcquisitions.scss";
 import { memo } from "react";
 
 export default memo(function NewAcquisitions() {
   const navigate = useNavigate();
-  const { data, loading, error } = useFetch(openLibraryEndpoints.getRecentBooks(5));
-  const recentBooks = data?.docs?.slice(0, 5) || [];
+  const { data, loading, error } = useFetch(openLibraryEndpoints.getRecentBooks(10));
+  const rawBooks: OpenLibraryDoc[] = data?.works || data?.docs || [];
+  const recentBooks: OpenLibraryDoc[] = rawBooks
+    .filter((book) => Boolean(book.cover_i && Number(book.cover_i) > 0))
+    .slice(0, 5);
 
   return (
     <div className="library-insights">
@@ -22,36 +25,47 @@ export default memo(function NewAcquisitions() {
 
       <div className="library-insights-body">
         {loading ? (
-          <div >
-            <span className="material-symbols-outlined" >
+          <div className="acquisitions-loading">
+            <span className="material-symbols-outlined">
               autorenew
             </span>
             <p>Loading recent books...</p>
           </div>
         ) : error ? (
-          <p >
+          <p className="acquisitions-error">
             Could not load recent acquisitions.
           </p>
         ) : recentBooks.length === 0 ? (
-          <p>
+          <p className="acquisitions-empty">
             No recent books found.
           </p>
         ) : (
           <ul className="acquisitions-list">
-            {recentBooks.map((book: any, index: number) => {
+            {recentBooks.map((book: OpenLibraryDoc, index: number) => {
               const bookKey = book.key ? book.key.replace("/works/", "") : `book-${index}`;
               const authors = Array.isArray(book.author_name) ? book.author_name.slice(0, 2).join(", ") : (book.author_name || "Unknown Author");
               const meta = book.first_publish_year ? `Edición ${book.first_publish_year} • Digital Ready` : "Digital Ready";
-              const coverImage = `https://covers.openlibrary.org/b/id/${book.cover_i}-M.jpg`;
-
-              console.log(book.cover_i);
+              const coverUrl = `https://covers.openlibrary.org/b/id/${book.cover_i}-M.jpg`;
 
               return (
                 <li key={bookKey} className="acquisition-item">
-                  <img
-                    src={coverImage}
-                    alt={"image book"}
-                  />
+                  <div className="acquisition-cover-wrap">
+                    <img
+                      src={coverUrl}
+                      alt={`${book.title || "Book"} cover`}
+                      className="acquisition-cover"
+                      onError={(event) => {
+                        event.currentTarget.classList.add("is-hidden");
+                        const placeholder = event.currentTarget.nextElementSibling;
+                        if (placeholder) {
+                          placeholder.classList.remove("is-hidden");
+                        }
+                      }}
+                    />
+                    <div className="acquisition-cover-placeholder is-hidden" aria-hidden="true">
+                      <span className="material-symbols-outlined">menu_book</span>
+                    </div>
+                  </div>
                   <div className="acquisition-info">
                     <h4>{book.title}</h4>
                     <p className="acquisition-author">{authors}</p>
@@ -59,11 +73,11 @@ export default memo(function NewAcquisitions() {
                   </div>
                   <SaveBookButton
                     id={bookKey}
-                    title={book.title}
+                    title={book.title || "Unknown Title"}
                     author_name={book.author_name}
                     cover_i={book.cover_i}
                     subject={book.subject}
-                    language={Array.isArray(book.language) ? book.language[0] : book.language}
+                    language={Array.isArray(book.language) ? book.language[0] : (book.language as string | undefined)}
                   />
                 </li>
               );

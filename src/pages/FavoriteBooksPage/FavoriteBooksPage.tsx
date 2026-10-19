@@ -12,10 +12,9 @@ export default function FavoriteBooksPage() {
 
   const loadSavedBooks = useCallback(async () => {
     try {
-      setLoading(true);
       const data = await booksService.getSavedBooks();
       setSavedBooks(data);
-    } catch (err) {
+    } catch (err: unknown) {
       console.error("Error loading saved books:", err);
     } finally {
       setLoading(false);
@@ -23,8 +22,31 @@ export default function FavoriteBooksPage() {
   }, []);
 
   useEffect(() => {
-    loadSavedBooks();
-  }, [loadSavedBooks]);
+    let isMounted = true;
+    async function initializeSavedBooks() {
+      try {
+        const data = await booksService.getSavedBooks();
+        if (isMounted) {
+          setSavedBooks(data);
+        }
+      } catch (err: unknown) {
+        console.error("Error loading saved books:", err);
+      } finally {
+        if (isMounted) {
+          setLoading(false);
+        }
+      }
+    }
+    initializeSavedBooks();
+    return () => {
+      isMounted = false;
+    };
+  }, []);
+
+  const handleRefresh = async () => {
+    setLoading(true);
+    await loadSavedBooks();
+  };
 
   return (
     <div className="saved-books-page">
@@ -42,12 +64,12 @@ export default function FavoriteBooksPage() {
         <div className="header-actions">
           <div className="count-badge">
             <span className="material-symbols-outlined">auto_stories</span>
-            <span>{savedBooks.length} {savedBooks.length === 1 ? "libro" : "libros"}</span>
+            <span>{savedBooks.length} {savedBooks.length === 1 ? "book" : "books"}</span>
           </div>
           <button
             type="button"
             className="refresh-btn"
-            onClick={loadSavedBooks}
+            onClick={handleRefresh}
             title="Recargar guardados"
           >
             <span className="material-symbols-outlined">refresh</span>

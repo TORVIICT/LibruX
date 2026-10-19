@@ -84,9 +84,26 @@ $shadow-hover: 0 12px 28px rgba(15, 23, 42, 0.12);
             }
 
             &.saved {
-                background: #eff6ff;
-                border-color: #bfdbfe;
-                color: $primary-color;
+                background: #dbeafe;
+                border-color: #2563eb;
+                color: #1d4ed8;
+
+                .material-symbols-outlined,
+                .icon-filled {
+                    color: #1d4ed8 !important;
+                    font-variation-settings: 'FILL' 1, 'wght' 600;
+                }
+
+                &:hover {
+                    background: #bfdbfe;
+                    border-color: #1d4ed8;
+                    color: #1e40af;
+
+                    .material-symbols-outlined,
+                    .icon-filled {
+                        color: #1d4ed8 !important;
+                    }
+                }
             }
         }
     }

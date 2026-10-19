@@ -14,15 +14,18 @@ export interface CardBookProps {
     language: string;
 }
 
+const FALLBACK_COVER = 'https://images.unsplash.com/photo-1543002588-bfa74002ed7e?w=400&q=80';
+
 function CardBookComponent({id, cover_i, title, author_name, subject, language}: CardBookProps) {
     const [isRenting, setIsRenting] = useState(false);
     const [rentSuccess, setRentSuccess] = useState(false);
     const [error, setError] = useState<string | null>(null);
+    const initialCover = cover_i ? `https://covers.openlibrary.org/b/id/${cover_i}-M.jpg` : FALLBACK_COVER;
+    const [coverImage, setCoverImage] = useState(initialCover);
     const { addNotification } = useNotifications();
     
     const navigate = useNavigate();
     const workId = String(id).replace('/works/', '');
-    const coverImage = `https://covers.openlibrary.org/b/id/${cover_i}-M.jpg`;
     const formattedAuthor = Array.isArray(author_name) ? author_name.slice(0, 2).join(", ") : (author_name || "Unknown Author");
     const formattedSubject = Array.isArray(subject) ? subject.slice(0, 3).join(", ") : (subject || "General");
 
@@ -51,9 +54,10 @@ function CardBookComponent({id, cover_i, title, author_name, subject, language}:
                 link: '/loans',
             });
             setTimeout(() => setRentSuccess(false), 4000);
-        } catch (err: any) {
-            setError(err.message || 'Could not request loan');
-            alert(`Error: ${err.message || 'Could not request loan'}`);
+        } catch (err: unknown) {
+            const errorMessage = err instanceof Error ? err.message : 'Could not request loan';
+            setError(errorMessage);
+            alert(`Error: ${errorMessage}`);
         } finally {
             setIsRenting(false);
         }
@@ -66,6 +70,7 @@ function CardBookComponent({id, cover_i, title, author_name, subject, language}:
                     <img 
                         src={coverImage}
                         alt={title}
+                        onError={() => setCoverImage(FALLBACK_COVER)}
                     />
                     <SaveBookButton
                         id={id}

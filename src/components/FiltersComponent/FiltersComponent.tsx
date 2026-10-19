@@ -1,83 +1,221 @@
-import { useState } from "react";
-import "./FiltersComponent.scss";
+import { useState } from 'react';
+import type { KeyboardEvent } from 'react';
+import './FiltersComponent.scss';
+import type { BookFiltersState, AvailabilityFilter } from '../../utils/filterBooks';
 
-export function FiltersComponent() {
-    const [isOpen, setIsOpen] = useState(false);
-    const [selectedRating, setSelectedRating] = useState<number>(0);
-    const [hoveredRating, setHoveredRating] = useState<number>(0);
+export const THEMATIC_CATEGORIES = [
+  'fantasy',
+  'technology',
+  'science',
+  'education',
+  'business',
+  'health',
+  'history',
+  'art',
+  'music',
+  'sports',
+];
 
-    return (
-        <section className={`panel-filters ${isOpen ? "is-open" : ""}`}>
+const LANGUAGE_CATEGORIES = [
+  'spanish',
+  'english',
+  'french',
+  'german',
+  'italian',
+];
 
-            <div className="title" onClick={() => setIsOpen(!isOpen)} role="button" tabIndex={0}>
-                <span className="material-symbols-outlined">
-                    tune
-                </span>
-                <h2>Filters</h2>
-                <span className="material-symbols-outlined toggle-icon">
-                    {isOpen ? "expand_less" : "expand_more"}
-                </span>
-            </div>
+export interface FiltersComponentProps {
+  filters: BookFiltersState;
+  activeFilterCount?: number;
+  onToggleCategory: (category: string) => void;
+  onSetAvailability: (availability: AvailabilityFilter) => void;
+  onSetRating: (rating: number) => void;
+  onToggleLanguage: (language: string) => void;
+  onApply: () => void;
+  onReset: () => void;
+}
 
-            <div className="tematic-category">
-                <h3>TEMATIC CATEGORY</h3>
-                <ul className="categories">
-                    <li><input type="checkbox" name="technology" id="technology" /><label htmlFor="technology">technology</label></li>
-                    <li><input type="checkbox" name="education" id="education" /><label htmlFor="education">education</label></li>
-                    <li><input type="checkbox" name="business" id="business" /><label htmlFor="business">business</label></li>
-                    <li><input type="checkbox" name="health" id="health" /><label htmlFor="health">health</label></li>
-                    <li><input type="checkbox" name="science" id="science" /><label htmlFor="science">science</label></li>
-                    <li><input type="checkbox" name="sports" id="sports" /><label htmlFor="sports">sports</label></li>
-                    <li><input type="checkbox" name="music" id="music" /><label htmlFor="music">music</label></li>
-                </ul>
-            </div>
+export function FiltersComponent({
+  filters,
+  activeFilterCount = 0,
+  onToggleCategory,
+  onSetAvailability,
+  onSetRating,
+  onToggleLanguage,
+  onApply,
+  onReset,
+}: FiltersComponentProps) {
+  const [isOpen, setIsOpen] = useState(false);
+  const [hoveredRating, setHoveredRating] = useState<number>(0);
 
-            <div className="availability-category">
-                <h3>AVAILABILITY CATEGORY</h3>
-                <ul className="categories">
-                    <li><input type="checkbox" name="available" id="available" /><label htmlFor="available">available</label></li>
-                    <li><input type="checkbox" name="not-available" id="not-available" /><label htmlFor="not-available">not available</label></li>
-                </ul>
-            </div>
+  const handleToggleOpen = () => {
+    setIsOpen((prev) => !prev);
+  };
 
-            <div className="qualification-category">
-                <h3>QUALIFICATION CATEGORY</h3>
-                <ul className="categories stars-rating">
-                    {[1, 2, 3, 4, 5].map((star) => {
-                        const isHighlighted = (hoveredRating || selectedRating) >= star;
-                        const isSelected = selectedRating === star;
-                        return (
-                            <li
-                                key={star}
-                                className={`star-item ${isHighlighted ? "active" : ""} ${isSelected ? "selected" : ""}`}
-                                onClick={() => setSelectedRating(selectedRating === star ? 0 : star)}
-                                onMouseEnter={() => setHoveredRating(star)}
-                                onMouseLeave={() => setHoveredRating(0)}
-                                role="button"
-                                tabIndex={0}
-                            >
-                                <span className="material-symbols-outlined star-icon">
-                                    star
-                                </span>
-                            </li>
-                        );
-                    })}
-                </ul>
-            </div>
+  const handleHeaderKeyDown = (event: KeyboardEvent<HTMLDivElement>) => {
+    if (event.key === 'Enter' || event.key === ' ') {
+      event.preventDefault();
+      handleToggleOpen();
+    }
+  };
 
-            <div className="lenguage-category">
-                <h3>LANGUAGE CATEGORY</h3>
-                <ul className="categories">
-                    <li><input type="checkbox" name="spanish" id="spanish" /><label htmlFor="spanish">spanish</label></li>
-                    <li><input type="checkbox" name="english" id="english" /><label htmlFor="english">english</label></li>
-                    <li><input type="checkbox" name="french" id="french" /><label htmlFor="french">french</label></li>
-                    <li><input type="checkbox" name="german" id="german" /><label htmlFor="german">german</label></li>
-                    <li><input type="checkbox" name="italian" id="italian" /><label htmlFor="italian">italian</label></li>
-                </ul>
-            </div>
+  const handleStarKeyDown = (
+    event: KeyboardEvent<HTMLLIElement>,
+    starValue: number
+  ) => {
+    if (event.key === 'Enter' || event.key === ' ') {
+      event.preventDefault();
+      onSetRating(starValue);
+    }
+  };
 
-            <button>APPLY FILTERS</button>
+  return (
+    <aside
+      className={`panel-filters ${isOpen ? 'is-open' : ''}`}
+      aria-label="Book Catalog Filters"
+    >
+      <div
+        className="title"
+        onClick={handleToggleOpen}
+        onKeyDown={handleHeaderKeyDown}
+        role="button"
+        tabIndex={0}
+        aria-expanded={isOpen}
+        aria-label="Toggle filters"
+      >
+        <span className="material-symbols-outlined icon-badge">tune</span>
+        <h2>Filters</h2>
+        {activeFilterCount > 0 && (
+          <span className="active-count-badge">
+            {activeFilterCount}
+          </span>
+        )}
+        <span className="material-symbols-outlined toggle-icon">
+          {isOpen ? 'expand_less' : 'expand_more'}
+        </span>
+      </div>
 
-        </section>
-    );
+      <div className="thematic-category">
+        <h3>Thematic Category</h3>
+        <ul className="categories">
+          {THEMATIC_CATEGORIES.map((category) => {
+            const isChecked = filters.categories.includes(category);
+            return (
+              <li key={category}>
+                <input
+                  type="checkbox"
+                  id={`category-${category}`}
+                  name={category}
+                  checked={isChecked}
+                  onChange={() => onToggleCategory(category)}
+                />
+                <label htmlFor={`category-${category}`}>{category}</label>
+              </li>
+            );
+          })}
+        </ul>
+      </div>
+
+      <div className="availability-category">
+        <h3>Availability</h3>
+        <ul className="categories">
+          <li>
+            <input
+              type="checkbox"
+              id="availability-available"
+              name="available"
+              checked={filters.availability === 'available'}
+              onChange={() =>
+                onSetAvailability(
+                  filters.availability === 'available' ? 'all' : 'available'
+                )
+              }
+            />
+            <label htmlFor="availability-available">Available</label>
+          </li>
+          <li>
+            <input
+              type="checkbox"
+              id="availability-not-available"
+              name="not-available"
+              checked={filters.availability === 'not-available'}
+              onChange={() =>
+                onSetAvailability(
+                  filters.availability === 'not-available'
+                    ? 'all'
+                    : 'not-available'
+                )
+              }
+            />
+            <label htmlFor="availability-not-available">Not Available</label>
+          </li>
+        </ul>
+      </div>
+
+      <div className="qualification-category">
+        <h3>Rating</h3>
+        <ul className="categories stars-rating" aria-label="Filter by minimum star rating">
+          {[1, 2, 3, 4, 5].map((star) => {
+            const isHighlighted = (hoveredRating || filters.minRating) >= star;
+            const isSelected = filters.minRating === star;
+            return (
+              <li
+                key={star}
+                className={`star-item ${isHighlighted ? 'active' : ''} ${
+                  isSelected ? 'selected' : ''
+                }`}
+                onClick={() => onSetRating(star)}
+                onMouseEnter={() => setHoveredRating(star)}
+                onMouseLeave={() => setHoveredRating(0)}
+                onKeyDown={(e) => handleStarKeyDown(e, star)}
+                role="button"
+                tabIndex={0}
+                aria-label={`${star} star minimum rating`}
+              >
+                <span className="material-symbols-outlined star-icon">star</span>
+              </li>
+            );
+          })}
+        </ul>
+      </div>
+
+      <div className="language-category">
+        <h3>Language</h3>
+        <ul className="categories">
+          {LANGUAGE_CATEGORIES.map((language) => {
+            const isChecked = filters.languages.includes(language);
+            return (
+              <li key={language}>
+                <input
+                  type="checkbox"
+                  id={`language-${language}`}
+                  name={language}
+                  checked={isChecked}
+                  onChange={() => onToggleLanguage(language)}
+                />
+                <label htmlFor={`language-${language}`}>{language}</label>
+              </li>
+            );
+          })}
+        </ul>
+      </div>
+
+      <div className="filter-actions">
+        <button
+          type="button"
+          className="btn-apply-filters"
+          onClick={onApply}
+        >
+          Apply Filters
+        </button>
+        <button
+          type="button"
+          className="btn-reset-filters"
+          onClick={onReset}
+        >
+          Reset Filters
+        </button>
+      </div>
+    </aside>
+  );
 }
