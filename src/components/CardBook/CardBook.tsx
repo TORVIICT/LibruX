@@ -1,4 +1,5 @@
 import { memo, useState } from "react";
+import { useNavigate } from "react-router";
 import "./CardBook.scss";
 import { loansService } from "../../services/loans.service";
 import { SaveBookButton } from "../SaveBookButton/SaveBookButton";
@@ -18,7 +19,9 @@ function CardBookComponent({id, cover_i, title, author_name, subject, language}:
     const [rentSuccess, setRentSuccess] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const { addNotification } = useNotifications();
-
+    
+    const navigate = useNavigate();
+    const workId = String(id).replace('/works/', '');
     const coverImage = `https://covers.openlibrary.org/b/id/${cover_i}-M.jpg`;
     const formattedAuthor = Array.isArray(author_name) ? author_name.slice(0, 2).join(", ") : (author_name || "Unknown Author");
     const formattedSubject = Array.isArray(subject) ? subject.slice(0, 3).join(", ") : (subject || "General");
@@ -30,7 +33,7 @@ function CardBookComponent({id, cover_i, title, author_name, subject, language}:
             
             await loansService.createLoan({
                 bookDetails: {
-                    openLibraryKey: String(id),
+                    openLibraryKey: workId,
                     title,
                     authorName: Array.isArray(author_name) ? author_name : [author_name || 'Unknown'],
                     coverId: cover_i || 0,
@@ -104,7 +107,18 @@ function CardBookComponent({id, cover_i, title, author_name, subject, language}:
                     </span>
                     {isRenting ? 'Requesting...' : rentSuccess ? 'Rented!' : 'Rent'}
                 </button>
-                <button className="view-button">
+                <button
+                    className="view-button"
+                    onClick={() => navigate(`/books/${workId}`, {
+                        state: {
+                            title,
+                            authorName: author_name,
+                            coverI: cover_i,
+                            subject,
+                            language,
+                        }
+                    })}
+                >
                     <span className="material-symbols-outlined">info</span>View more
                 </button>
             </div>

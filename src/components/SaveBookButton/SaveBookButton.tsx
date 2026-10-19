@@ -58,7 +58,6 @@ function SaveBookButtonComponent({
       try {
         setLoading(true);
         if (isSaved) {
-          // Remove from saved
           await booksService.removeBookReference(key);
           setIsSaved(false);
           onSavedChange?.(false);
@@ -79,8 +78,8 @@ function SaveBookButtonComponent({
           setIsSaved(true);
           onSavedChange?.(true);
           addNotification({
-            title: "Libro guardado",
-            message: `"${title}" se guardó exitosamente en tus referencias.`,
+            title: "Book saved",
+            message: `"${title}" has been saved successfully in your references.`,
             type: "success",
             link: "/saved-books",
           });

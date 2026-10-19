@@ -15,9 +15,8 @@ export const AppRoutes = () => {
             
             <Route element={<Layout />} >
                 <Route path="/dashboard" element={<Dashboard />} />
-                <Route path="/books" element={<BooksPage />}>
-                    <Route path=":bookId" element={<BookPage />} />
-                </Route>
+                <Route path="/books" element={<BooksPage />} />
+                <Route path="/books/:bookId" element={<BookPage />} />
                 <Route path="/loans" element={<LoanPage />} />
                 <Route path="/saved-books" element={<FavoriteBooksPage />} />
                 <Route path="*" element={<NotFoundPage />} />
