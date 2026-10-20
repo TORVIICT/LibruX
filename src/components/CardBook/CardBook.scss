@@ -296,6 +296,14 @@ $shadow-hover: 0 12px 28px rgba(15, 23, 42, 0.12);
         .img-container {
             height: 180px;
         }
+
+
+    }
+
+    .cardBook-info>div:not(.img-container):not(.cardBook-info-text) {
+        .rating {
+            padding: 0;
+        }
     }
 
     .cardBook-info-text {
@@ -308,6 +316,7 @@ $shadow-hover: 0 12px 28px rgba(15, 23, 42, 0.12);
         button {
             padding: 8px 10px;
             font-size: 0.775rem;
+            font-size: 0;
         }
     }
 }
