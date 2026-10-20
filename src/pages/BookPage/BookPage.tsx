@@ -7,10 +7,27 @@ import { loansService } from "../../services/loans.service";
 import { useNotifications } from "../../context/NotificationContext";
 import "./BookPage.scss";
 
-function getDescription(desc: any): string {
+interface DescriptionObject {
+    value?: string;
+}
+
+interface OpenLibraryAuthorRef {
+    author: {
+        key: string;
+    };
+}
+
+interface OpenLibraryAuthorResponse {
+    name?: string;
+}
+
+function getDescription(desc: unknown): string {
     if (!desc) return "No description available for this book.";
     if (typeof desc === "string") return desc;
-    if (typeof desc === "object" && desc.value) return desc.value;
+    if (typeof desc === "object" && desc !== null && "value" in desc) {
+        const val = (desc as DescriptionObject).value;
+        if (typeof val === "string") return val;
+    }
     return "No description available for this book.";
 }
 
@@ -18,6 +35,8 @@ export default function BookPage() {
     const { bookId } = useParams();
     const navigate = useNavigate();
     const location = useLocation();
+
+    const cleanBookId = String(bookId || "").replace('/works/', '').trim();
 
     const stateData = location.state as {
         title?: string;
@@ -32,17 +51,38 @@ export default function BookPage() {
     );
     
     const [authors, setAuthors] = useState<string[]>(stateData?.authorName || []);
+    const [isRented, setIsRented] = useState<boolean>(() => loansService.isBookRentedSync(cleanBookId));
     const [isRenting, setIsRenting] = useState(false);
-    const [rentSuccess, setRentSuccess] = useState(false);
     const { addNotification } = useNotifications();
+
+    useEffect(() => {
+        let isMounted = true;
+        loansService.isBookRented(cleanBookId).then((rented) => {
+            if (isMounted) {
+                setIsRented(rented);
+            }
+        });
+
+        const unsubscribe = loansService.subscribeToRentalChanges(cleanBookId, (rented) => {
+            if (isMounted) {
+                setIsRented(rented);
+            }
+        });
+
+        return () => {
+            isMounted = false;
+            unsubscribe();
+        };
+    }, [cleanBookId]);
 
     useEffect(() => {
         if (data?.authors && authors.length === 0) {
             const fetchAuthors = async () => {
                 try {
-                    const authorPromises = data.authors.slice(0, 3).map(async (a: any) => {
+                    const authorRefs = data.authors as OpenLibraryAuthorRef[];
+                    const authorPromises = authorRefs.slice(0, 3).map(async (a) => {
                         const res = await fetch(`https://openlibrary.org${a.author.key}.json`);
-                        const authorData = await res.json();
+                        const authorData = (await res.json()) as OpenLibraryAuthorResponse;
                         return authorData.name || "Unknown Author";
                     });
                     const names = await Promise.all(authorPromises);
@@ -53,33 +93,34 @@ export default function BookPage() {
             };
             fetchAuthors();
         }
-    }, [data]);
+    }, [data, authors.length]);
 
     const handleRent = async () => {
-        if (!data && !stateData) return;
+        if (isRented || isRenting || (!data && !stateData)) return;
         try {
             setIsRenting(true);
             await loansService.createLoan({
                 bookDetails: {
-                    openLibraryKey: bookId || "",
+                    openLibraryKey: cleanBookId,
                     title: data?.title || stateData?.title || "Unknown",
                     authorName: authors,
                     coverId: stateData?.coverI || (data?.covers?.[0]) || 0,
                     subject: data?.subjects?.slice(0, 5) || stateData?.subject || [],
                     language: stateData?.language || "eng",
+                    totalCopies: 1,
                 },
                 notes: "Requested from book detail page",
             });
-            setRentSuccess(true);
+            setIsRented(true);
             addNotification({
                 title: "Préstamo solicitado",
                 message: `Has solicitado "${data?.title || stateData?.title}" exitosamente.`,
                 type: "success",
                 link: "/loans",
             });
-            setTimeout(() => setRentSuccess(false), 4000);
-        } catch (err: any) {
-            alert(`Error: ${err.message || "Could not request loan"}`);
+        } catch (err: unknown) {
+            const message = err instanceof Error ? err.message : "Could not request loan";
+            alert(`Error: ${message}`);
         } finally {
             setIsRenting(false);
         }
@@ -124,7 +165,7 @@ export default function BookPage() {
             <div className="book-detail-container">
                 <div className="book-cover-section">
                     {coverUrl ? (
-                        <img src={coverUrl} alt={title} className="book-cover" />
+                        <img src={coverUrl} alt={title} className="book-cover" decoding="async" />
                     ) : (
                         <div className="book-cover-placeholder">
                             <span className="material-symbols-outlined">menu_book</span>
@@ -133,18 +174,18 @@ export default function BookPage() {
 
                     <div className="book-actions">
                         <button
-                            className={`rent-btn ${rentSuccess ? "success" : ""}`}
+                            className={`rent-btn ${isRented ? "is-rented" : ""}`}
                             onClick={handleRent}
-                            disabled={isRenting || rentSuccess}
+                            disabled={isRenting || isRented}
                         >
                             <span className="material-symbols-outlined">
-                                {rentSuccess ? "check_circle" : "local_library"}
+                                {isRented ? "check_circle" : "local_library"}
                             </span>
-                            {isRenting ? "Requesting..." : rentSuccess ? "Rented!" : "Rent this Book"}
+                            {isRenting ? "Requesting..." : isRented ? "Rented" : "Rent this Book"}
                         </button>
 
                         <SaveBookButton
-                            id={bookId || ""}
+                            id={cleanBookId}
                             title={title}
                             author_name={authors}
                             cover_i={coverId || 0}

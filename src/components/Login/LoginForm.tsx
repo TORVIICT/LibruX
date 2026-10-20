@@ -1,6 +1,6 @@
 import { useState } from "react";
 import type { SubmitEvent } from "react";
-import { useNavigate } from "react-router";
+import { useNavigate, useLocation } from "react-router";
 import { validateLogin } from "../../utils/utils";
 import { login } from "../../services/auth.service";
 
@@ -23,6 +23,7 @@ export const LoginForm = ({ view, toggleView, saveToken, getAuthErrorMessage }: 
   const [errors, setErrors] = useState<FormErrors>({});
   const [submitted, setSubmitted] = useState(false);
   const navigate = useNavigate();
+  const location = useLocation();
 
   const handleSubmit = async (event: SubmitEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -48,7 +49,8 @@ export const LoginForm = ({ view, toggleView, saveToken, getAuthErrorMessage }: 
       const userName = authData.user?.user_metadata?.name || authData.user?.email || "Usuario";
       localStorage.setItem("user-name", userName);
       
-      navigate("/dashboard");
+      const fromPath = (location.state as { from?: { pathname: string } })?.from?.pathname || "/dashboard";
+      navigate(fromPath, { replace: true });
     }
   };
 

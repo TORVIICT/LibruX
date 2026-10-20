@@ -1,4 +1,4 @@
-import { createContext, useContext, useState, useEffect, useCallback, type ReactNode } from "react";
+import { createContext, useContext, useState, useEffect, useCallback, useMemo, type ReactNode } from "react";
 import { loansService } from "../services/loans.service";
 import { useAuth } from "./AuthContext";
 
@@ -36,8 +36,8 @@ const STORAGE_KEY = "librux_notifications";
 const INITIAL_NOTIFICATIONS: NotificationItem[] = [
   {
     id: "welcome-notif",
-    title: "Bienvenido a Librux",
-    message: "Explora nuestro catálogo digital y gestiona tus préstamos.",
+    title: "Welcome to Librux",
+    message: "Explore our digital catalog and manage your loans.",
     type: "info",
     timestamp: new Date().toISOString(),
     read: false,
@@ -83,7 +83,6 @@ export function NotificationProvider({ children }: { children: ReactNode }) {
       };
 
       setNotifications((prev) => {
-        // Evitar duplicados por id si se pasó uno específico
         if (item.id && prev.some((n) => n.id === item.id)) {
           return prev;
         }
@@ -111,7 +110,6 @@ export function NotificationProvider({ children }: { children: ReactNode }) {
     setNotifications([]);
   }, []);
 
-  // Verificar automáticamente vencimientos de préstamos activos
   const checkLoanDeadlines = useCallback(async () => {
     if (!isAuthenticated) return;
     try {
@@ -123,23 +121,21 @@ export function NotificationProvider({ children }: { children: ReactNode }) {
         if (loan.status === "ACTIVE" || loan.status === "RENEWED") {
           const dueDate = new Date(loan.dueDate).getTime();
           const diffDays = Math.ceil((dueDate - now) / (1000 * 60 * 60 * 24));
-          const bookTitle = loan.bookReference?.title || "Libro prestado";
+          const bookTitle = loan.bookReference?.title || "Borrowed book";
 
           if (diffDays < 0) {
-            // Préstamo vencido
             addNotification({
               id: `loan-overdue-${loan.id}`,
-              title: "Préstamo Vencido",
-              message: `El préstamo de "${bookTitle}" venció hace ${Math.abs(diffDays)} días.`,
+              title: "Overdue Loan",
+              message: `Your loan of "${bookTitle}" expired ${Math.abs(diffDays)} days ago.`,
               type: "alert",
               link: "/loans",
             });
           } else if (diffDays <= 3) {
-            // Vence pronto (menos de 3 días)
             addNotification({
               id: `loan-due-soon-${loan.id}`,
-              title: "Próximo a Vencer",
-              message: `"${bookTitle}" vence en ${diffDays === 0 ? "hoy" : `${diffDays} día(s)`}.`,
+              title: "Due Soon",
+              message: `"${bookTitle}" will be due in ${diffDays === 0 ? "today" : `${diffDays} day(s)`}.`,
               type: "warning",
               link: "/loans",
             });
@@ -147,7 +143,7 @@ export function NotificationProvider({ children }: { children: ReactNode }) {
         }
       });
     } catch {
-      // Ignorar silenciosamente si falla la llamada
+
     }
   }, [isAuthenticated, addNotification]);
 
@@ -157,20 +153,33 @@ export function NotificationProvider({ children }: { children: ReactNode }) {
     }
   }, [isAuthenticated, checkLoanDeadlines]);
 
-  const unreadCount = notifications.filter((n) => !n.read).length;
+  const unreadCount = useMemo(() => {
+    return notifications.filter((n) => !n.read).length;
+  }, [notifications]);
+
+  const contextValue = useMemo(() => ({
+    notifications,
+    unreadCount,
+    addNotification,
+    markAsRead,
+    markAllAsRead,
+    removeNotification,
+    clearAll,
+    checkLoanDeadlines,
+}), [
+    notifications,
+    unreadCount,
+    addNotification,
+    markAsRead,
+    markAllAsRead,
+    removeNotification,
+    clearAll,
+    checkLoanDeadlines,
+]);
 
   return (
     <NotificationContext.Provider
-      value={{
-        notifications,
-        unreadCount,
-        addNotification,
-        markAsRead,
-        markAllAsRead,
-        removeNotification,
-        clearAll,
-        checkLoanDeadlines,
-      }}
+      value={contextValue}
     >
       {children}
     </NotificationContext.Provider>
@@ -180,12 +189,12 @@ export function NotificationProvider({ children }: { children: ReactNode }) {
 const defaultNotificationContext: NotificationContextType = {
   notifications: [],
   unreadCount: 0,
-  addNotification: () => {},
-  markAsRead: () => {},
-  markAllAsRead: () => {},
-  removeNotification: () => {},
-  clearAll: () => {},
-  checkLoanDeadlines: async () => {},
+  addNotification: () => { },
+  markAsRead: () => { },
+  markAllAsRead: () => { },
+  removeNotification: () => { },
+  clearAll: () => { },
+  checkLoanDeadlines: async () => { },
 };
 
 export function useNotifications() {

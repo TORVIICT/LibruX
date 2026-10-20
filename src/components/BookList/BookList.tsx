@@ -1,18 +1,25 @@
-import { useMemo } from 'react';
+import { useMemo, useEffect, memo } from 'react';
 import { CardBook } from '../CardBook/CardBook';
 import './BookList.scss';
 import { openLibraryEndpoints, type OpenLibraryDoc } from '../../services/openlibrary.service';
 import { useFetch } from '../../hooks/useFetch';
 import { useSearchContext } from '../../context/SearchContext';
 import { filterBooks, type BookFiltersState, LANGUAGE_API_CODE_MAP } from '../../utils/filterBooks';
+import { loansService } from '../../services/loans.service';
 
 export interface BookListProps {
   filters?: BookFiltersState;
   onResetFilters?: () => void;
 }
 
-export function BookList({ filters, onResetFilters }: BookListProps = {}) {
+function BookListComponent({ filters, onResetFilters }: BookListProps = {}) {
   const { search } = useSearchContext();
+  const DEFAULT_AUTHORS: string[] = Object.freeze(['Unknown Author']) as unknown as string[];
+  const DEFAULT_SUBJECTS: string[] = Object.freeze(['General']) as unknown as string[];
+
+  useEffect(() => {
+    loansService.fetchAllRentedBooks();
+  }, []);
 
   const selectedCategory =
     filters?.categories && filters.categories.length > 0
@@ -69,13 +76,14 @@ export function BookList({ filters, onResetFilters }: BookListProps = {}) {
             book.key ||
             (book as { id?: string | number }).id?.toString() ||
             `book-${index}`;
-          const authors = book.author_name || ['Unknown Author'];
-          const subjects =
-            book.subject && book.subject.length > 0
-              ? book.subject
-              : filters?.categories && filters.categories.length > 0
-              ? filters.categories
-              : ['General'];
+          const authors = book.author_name && book.author_name.length > 0
+            ? book.author_name
+            : DEFAULT_AUTHORS;
+          const subjects = book.subject && book.subject.length > 0
+            ? book.subject
+            : filters?.categories && filters.categories.length > 0
+            ? filters.categories
+            : DEFAULT_SUBJECTS;;
           const language = Array.isArray(book.language)
             ? book.language[0]
             : book.language || 'eng';
@@ -96,3 +104,5 @@ export function BookList({ filters, onResetFilters }: BookListProps = {}) {
     </div>
   );
 }
+
+export const BookList = memo(BookListComponent);

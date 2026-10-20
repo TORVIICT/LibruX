@@ -22,26 +22,8 @@ export default function FavoriteBooksPage() {
   }, []);
 
   useEffect(() => {
-    let isMounted = true;
-    async function initializeSavedBooks() {
-      try {
-        const data = await booksService.getSavedBooks();
-        if (isMounted) {
-          setSavedBooks(data);
-        }
-      } catch (err: unknown) {
-        console.error("Error loading saved books:", err);
-      } finally {
-        if (isMounted) {
-          setLoading(false);
-        }
-      }
-    }
-    initializeSavedBooks();
-    return () => {
-      isMounted = false;
-    };
-  }, []);
+    loadSavedBooks();
+  }, [loadSavedBooks]);
 
   const handleRefresh = async () => {
     setLoading(true);

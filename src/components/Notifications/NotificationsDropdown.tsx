@@ -2,6 +2,7 @@ import { useState, useRef, useEffect } from "react";
 import { useNavigate } from "react-router";
 import { useNotifications, type NotificationItem } from "../../context/NotificationContext";
 import "./NotificationsDropdown.scss";
+import { getIcon, formatTime } from "../../utils/utils";
 
 export function NotificationsDropdown() {
   const [isOpen, setIsOpen] = useState(false);
@@ -16,7 +17,6 @@ export function NotificationsDropdown() {
     clearAll,
   } = useNotifications();
 
-  // Cerrar al hacer clic fuera
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
@@ -37,39 +37,6 @@ export function NotificationsDropdown() {
     if (notif.link) {
       navigate(notif.link);
       setIsOpen(false);
-    }
-  };
-
-  const getIcon = (type: NotificationItem["type"]) => {
-    switch (type) {
-      case "alert":
-        return { icon: "error", className: "icon-alert" };
-      case "warning":
-        return { icon: "warning", className: "icon-warning" };
-      case "success":
-        return { icon: "check_circle", className: "icon-success" };
-      case "info":
-      default:
-        return { icon: "info", className: "icon-info" };
-    }
-  };
-
-  const formatTime = (isoString: string) => {
-    try {
-      const date = new Date(isoString);
-      const now = new Date();
-      const diffMs = now.getTime() - date.getTime();
-      const diffMins = Math.floor(diffMs / (1000 * 60));
-      const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
-      const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
-
-      if (diffMins < 1) return "Hace un momento";
-      if (diffMins < 60) return `Hace ${diffMins} min`;
-      if (diffHours < 24) return `Hace ${diffHours} h`;
-      if (diffDays === 1) return "Ayer";
-      return date.toLocaleDateString();
-    } catch {
-      return "";
     }
   };
 
@@ -94,9 +61,9 @@ export function NotificationsDropdown() {
         <div className="notifications-panel">
           <div className="panel-header">
             <div className="header-title">
-              <h3>Notificaciones</h3>
+              <h3>Notifications</h3>
               {unreadCount > 0 && (
-                <span className="unread-counter">{unreadCount} nuevas</span>
+                <span className="unread-counter">{unreadCount} news</span>
               )}
             </div>
             <div className="header-actions">
@@ -105,10 +72,10 @@ export function NotificationsDropdown() {
                   type="button"
                   className="text-action-btn"
                   onClick={markAllAsRead}
-                  title="Marcar todas como leídas"
+                  title="Mark all as read"
                 >
                   <span className="material-symbols-outlined">done_all</span>
-                  <span>Leer todas</span>
+                  <span>Read all</span>
                 </button>
               )}
               {notifications.length > 0 && (
@@ -116,7 +83,7 @@ export function NotificationsDropdown() {
                   type="button"
                   className="icon-action-btn"
                   onClick={clearAll}
-                  title="Limpiar todas"
+                  title="Clear all"
                 >
                   <span className="material-symbols-outlined">delete_sweep</span>
                 </button>
@@ -128,7 +95,7 @@ export function NotificationsDropdown() {
             {notifications.length === 0 ? (
               <div className="empty-notifications">
                 <span className="material-symbols-outlined">notifications_off</span>
-                <p>No tienes notificaciones en este momento</p>
+                <p>You don't have any notifications right now.</p>
               </div>
             ) : (
               <ul className="notifications-list">
@@ -153,7 +120,7 @@ export function NotificationsDropdown() {
                       </div>
 
                       <div className="notification-actions">
-                        {!item.read && <span className="unread-dot" title="No leída" />}
+                        {!item.read && <span className="unread-dot" title="Not read" />}
                         <button
                           type="button"
                           className="dismiss-btn"
@@ -161,7 +128,7 @@ export function NotificationsDropdown() {
                             e.stopPropagation();
                             removeNotification(item.id);
                           }}
-                          title="Eliminar notificación"
+                          title="Delete notification"
                         >
                           <span className="material-symbols-outlined">close</span>
                         </button>

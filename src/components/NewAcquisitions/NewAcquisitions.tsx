@@ -9,9 +9,7 @@ export default memo(function NewAcquisitions() {
   const navigate = useNavigate();
   const { data, loading, error } = useFetch(openLibraryEndpoints.getRecentBooks(10));
   const rawBooks: OpenLibraryDoc[] = data?.works || data?.docs || [];
-  const recentBooks: OpenLibraryDoc[] = rawBooks
-    .filter((book) => Boolean(book.cover_i && Number(book.cover_i) > 0))
-    .slice(0, 5);
+  const recentBooks: OpenLibraryDoc[] = rawBooks.slice(0, 5);
 
   return (
     <div className="library-insights">
@@ -45,24 +43,32 @@ export default memo(function NewAcquisitions() {
               const bookKey = book.key ? book.key.replace("/works/", "") : `book-${index}`;
               const authors = Array.isArray(book.author_name) ? book.author_name.slice(0, 2).join(", ") : (book.author_name || "Unknown Author");
               const meta = book.first_publish_year ? `Edición ${book.first_publish_year} • Digital Ready` : "Digital Ready";
-              const coverUrl = `https://covers.openlibrary.org/b/id/${book.cover_i}-M.jpg`;
+              const coverUrl = book.cover_i && Number(book.cover_i) > 0
+                ? `https://covers.openlibrary.org/b/id/${book.cover_i}-M.jpg`
+                : book.cover_edition_key
+                ? `https://covers.openlibrary.org/b/olid/${book.cover_edition_key}-M.jpg`
+                : null;
 
               return (
                 <li key={bookKey} className="acquisition-item">
                   <div className="acquisition-cover-wrap">
-                    <img
-                      src={coverUrl}
-                      alt={`${book.title || "Book"} cover`}
-                      className="acquisition-cover"
-                      onError={(event) => {
-                        event.currentTarget.classList.add("is-hidden");
-                        const placeholder = event.currentTarget.nextElementSibling;
-                        if (placeholder) {
-                          placeholder.classList.remove("is-hidden");
-                        }
-                      }}
-                    />
-                    <div className="acquisition-cover-placeholder is-hidden" aria-hidden="true">
+                    {coverUrl ? (
+                      <img
+                        src={coverUrl}
+                        alt={`${book.title || "Book"} cover`}
+                        className="acquisition-cover"
+                        loading="lazy"
+                        decoding="async"
+                        onError={(event) => {
+                          event.currentTarget.classList.add("is-hidden");
+                          const placeholder = event.currentTarget.nextElementSibling;
+                          if (placeholder) {
+                            placeholder.classList.remove("is-hidden");
+                          }
+                        }}
+                      />
+                    ) : null}
+                    <div className={`acquisition-cover-placeholder ${coverUrl ? "is-hidden" : ""}`} aria-hidden="true">
                       <span className="material-symbols-outlined">menu_book</span>
                     </div>
                   </div>
@@ -75,7 +81,7 @@ export default memo(function NewAcquisitions() {
                     id={bookKey}
                     title={book.title || "Unknown Title"}
                     author_name={book.author_name}
-                    cover_i={book.cover_i}
+                    cover_i={book.cover_i || 0}
                     subject={book.subject}
                     language={Array.isArray(book.language) ? book.language[0] : (book.language as string | undefined)}
                   />

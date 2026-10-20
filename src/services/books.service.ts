@@ -72,8 +72,8 @@ export const booksService = {
           coverId: raw.cover_id || 0,
           subject: raw.subject || [],
           language: raw.language || 'eng',
-          totalCopies: raw.total_copies ?? 5,
-          availableCopies: raw.available_copies ?? 5,
+          totalCopies: raw.total_copies ?? 1,
+          availableCopies: raw.available_copies ?? 1,
         }));
       }
     } catch {
@@ -127,7 +127,7 @@ export const booksService = {
   async saveBookReference(book: BookToSave): Promise<BookReference> {
     const rawKey = book.openLibraryKey;
     const cleanKey = rawKey.replace('/works/', '');
-    const authorName = Array.isArray(book.authorName) ? book.authorName : [book.authorName || 'Desconocido'];
+    const authorName = Array.isArray(book.authorName) ? book.authorName : [book.authorName || 'Unknown Author'];
     const subject = Array.isArray(book.subject) ? book.subject : [book.subject || 'General'];
 
     const targetBook: BookReference = {
@@ -138,8 +138,8 @@ export const booksService = {
       coverId: book.coverId || 0,
       subject,
       language: book.language || 'eng',
-      totalCopies: book.totalCopies ?? 5,
-      availableCopies: book.availableCopies ?? 5,
+      totalCopies: book.totalCopies ?? 1,
+      availableCopies: book.availableCopies ?? 1,
     };
 
     const currentBooks = getLocalSavedBooks();
@@ -174,8 +174,8 @@ export const booksService = {
             cover_id: book.coverId || 0,
             subject,
             language: book.language || 'eng',
-            total_copies: book.totalCopies ?? 5,
-            available_copies: book.availableCopies ?? 5,
+            total_copies: book.totalCopies ?? 1,
+            available_copies: book.availableCopies ?? 1,
           });
       }
     } catch (error: unknown) {

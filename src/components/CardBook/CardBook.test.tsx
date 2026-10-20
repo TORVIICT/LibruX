@@ -1,4 +1,4 @@
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { render, screen, fireEvent, waitFor, act } from '@testing-library/react';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { MemoryRouter } from 'react-router';
 import { CardBook } from './CardBook';
@@ -7,6 +7,11 @@ import { loansService, type Loan } from '../../services/loans.service';
 vi.mock('../../services/loans.service', () => ({
   loansService: {
     createLoan: vi.fn(),
+    isBookRentedSync: vi.fn().mockReturnValue(false),
+    isBookRented: vi.fn().mockResolvedValue(false),
+    subscribeToRentalChanges: vi.fn().mockReturnValue(() => {}),
+    markBookRented: vi.fn(),
+    markBookAvailable: vi.fn(),
   },
 }));
 
@@ -26,6 +31,9 @@ describe('CardBook', () => {
 
   beforeEach(() => {
     vi.clearAllMocks();
+    vi.mocked(loansService.isBookRentedSync).mockReturnValue(false);
+    vi.mocked(loansService.isBookRented).mockResolvedValue(false);
+    vi.mocked(loansService.subscribeToRentalChanges).mockReturnValue(() => {});
     vi.spyOn(window, 'alert').mockImplementation(() => {});
   });
 
@@ -56,10 +64,28 @@ describe('CardBook', () => {
     expect(screen.getByRole('heading', { level: 4, name: 'Unknown Book' })).toBeInTheDocument();
   });
 
-  it('should trigger createLoan and display rented state on click', async () => {
+  it('should render already rented book as disabled with Rented text on mount', async () => {
+    vi.mocked(loansService.isBookRentedSync).mockReturnValue(true);
+    vi.mocked(loansService.isBookRented).mockResolvedValue(true);
+
+    renderWithRouter(<CardBook {...defaultProps} />);
+
+    const rentButton = screen.getByRole('button', { name: /rented/i });
+    expect(rentButton).toBeInTheDocument();
+    expect(rentButton).toBeDisabled();
+    expect(rentButton).toHaveClass('is-rented');
+    expect(screen.getByText('Not Availability')).toBeInTheDocument();
+
+    fireEvent.click(rentButton);
+    expect(loansService.createLoan).not.toHaveBeenCalled();
+  });
+
+  it('should trigger createLoan and permanently display rented state on click', async () => {
     vi.mocked(loansService.createLoan).mockResolvedValueOnce({} as Loan);
 
     renderWithRouter(<CardBook {...defaultProps} />);
+
+    expect(screen.getByText('Availability')).toBeInTheDocument();
 
     const rentButton = screen.getByRole('button', { name: /rent/i });
     expect(rentButton).toBeInTheDocument();
@@ -76,14 +102,18 @@ describe('CardBook', () => {
         coverId: 1001,
         subject: ['Fantasy', 'Adventure'],
         language: 'English',
+        totalCopies: 1,
       },
       notes: 'Requested from digital catalog',
     });
 
     await waitFor(() => {
-      expect(screen.getByRole('button', { name: /rented!/i })).toBeInTheDocument();
+      expect(screen.getByRole('button', { name: /rented/i })).toBeInTheDocument();
     });
-    expect(screen.getByRole('button', { name: /rented!/i })).toBeDisabled();
+    const updatedButton = screen.getByRole('button', { name: /rented/i });
+    expect(updatedButton).toBeDisabled();
+    expect(updatedButton).toHaveClass('is-rented');
+    expect(screen.getByText('Not Availability')).toBeInTheDocument();
   });
 
   it('should display error message when createLoan fails', async () => {
@@ -100,11 +130,35 @@ describe('CardBook', () => {
     expect(window.alert).toHaveBeenCalledWith('Error: Loan quota exceeded');
   });
 
+  it('should update to rented state when external rental change event triggers', async () => {
+    let rentalCallback: (isRented: boolean) => void = () => {};
+    vi.mocked(loansService.subscribeToRentalChanges).mockImplementation((_key, callback) => {
+      rentalCallback = callback;
+      return () => {};
+    });
+
+    renderWithRouter(<CardBook {...defaultProps} />);
+
+    await waitFor(() => {
+      expect(screen.getByRole('button', { name: /rent/i })).not.toBeDisabled();
+    });
+
+    act(() => {
+      rentalCallback(true);
+    });
+
+    await waitFor(() => {
+      expect(screen.getByRole('button', { name: /rented/i })).toBeDisabled();
+    });
+  });
+
   it('should fallback image source on image load error', () => {
     renderWithRouter(<CardBook {...defaultProps} />);
 
     const img = screen.getByRole('img', { name: 'The Hobbit' });
-    fireEvent.error(img);
+    act(() => {
+      fireEvent.error(img);
+    });
 
     expect(img).toHaveAttribute(
       'src',

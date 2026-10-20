@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import "./LoanPage.scss";
 import { loansService } from "../../services/loans.service";
 import type { Loan, LoanStatus } from "../../services/loans.service";
@@ -9,21 +9,38 @@ export default function LoanPage() {
   const [loading, setLoading] = useState(true);
   const [actionMessage, setActionMessage] = useState<string | null>(null);
 
-  const fetchLoans = async (statusFilter?: string) => {
+  const fetchLoans = useCallback(async (statusFilter?: string) => {
     try {
-      setLoading(true);
       const filter = statusFilter === "ALL" ? undefined : (statusFilter as LoanStatus);
       const res = await loansService.getUserLoans(filter);
       setLoans(res.data || []);
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error("Error fetching loans:", err);
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
 
   useEffect(() => {
-    fetchLoans(activeFilter);
+    let isMounted = true;
+    const filter = activeFilter === "ALL" ? undefined : (activeFilter as LoanStatus);
+    loansService.getUserLoans(filter)
+      .then((res) => {
+        if (isMounted) {
+          setLoans(res.data || []);
+          setLoading(false);
+        }
+      })
+      .catch((err: unknown) => {
+        if (isMounted) {
+          console.error("Error fetching loans:", err);
+          setLoading(false);
+        }
+      });
+
+    return () => {
+      isMounted = false;
+    };
   }, [activeFilter]);
 
   const handleReturn = async (loanId: string) => {
@@ -32,8 +49,9 @@ export default function LoanPage() {
       setActionMessage("Book successfully returned!");
       setTimeout(() => setActionMessage(null), 3000);
       fetchLoans(activeFilter);
-    } catch (err: any) {
-      alert(`Error: ${err.message}`);
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : 'Could not return book';
+      alert(`Error: ${message}`);
     }
   };
 
@@ -43,8 +61,9 @@ export default function LoanPage() {
       setActionMessage("Loan renewed for 7 additional days!");
       setTimeout(() => setActionMessage(null), 3000);
       fetchLoans(activeFilter);
-    } catch (err: any) {
-      alert(`Error: ${err.message}`);
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : 'Could not renew loan';
+      alert(`Error: ${message}`);
     }
   };
 
@@ -55,8 +74,9 @@ export default function LoanPage() {
       setActionMessage("Loan cancelled.");
       setTimeout(() => setActionMessage(null), 3000);
       fetchLoans(activeFilter);
-    } catch (err: any) {
-      alert(`Error: ${err.message}`);
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : 'Could not cancel loan';
+      alert(`Error: ${message}`);
     }
   };
 
@@ -116,7 +136,7 @@ export default function LoanPage() {
                   <tr key={loan.id}>
                     <td>
                       <div className="book-info-cell">
-                        <img src={coverUrl} alt={loan.bookReference?.title} />
+                        <img src={coverUrl} alt={loan.bookReference?.title} loading="lazy" decoding="async" />
                         <div>
                           <p className="book-title">{loan.bookReference?.title || "Book"}</p>
                           <p className="book-author">

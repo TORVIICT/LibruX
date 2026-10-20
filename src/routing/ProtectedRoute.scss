@@ -1,0 +1,34 @@
+.auth-loading-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  width: 100%;
+  background-color: #f8fafc;
+  color: #1e293b;
+  font-family: inherit;
+  gap: 1rem;
+}
+
+.auth-loading-spinner {
+  font-size: 2.5rem;
+  color: #2563eb;
+  animation: auth-spin 1s linear infinite;
+}
+
+.auth-loading-text {
+  font-size: 1rem;
+  font-weight: 500;
+  color: #64748b;
+  margin: 0;
+}
+
+@keyframes auth-spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}

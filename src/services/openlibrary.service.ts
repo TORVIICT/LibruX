@@ -5,6 +5,7 @@ export interface OpenLibraryDoc {
     title?: string;
     author_name?: string[];
     cover_i?: number;
+    cover_edition_key?: string;
     subject?: string[];
     language?: string[];
     first_publish_year?: number;
@@ -22,5 +23,5 @@ export const openLibraryEndpoints = {
         return `${BASE_URL}/search.json?${parts.join('&')}`;
     },
     getBookDetails: (isbn: string) => `${BASE_URL}/works/${isbn}.json`,
-    getRecentBooks: (limit: number = 5) => `${BASE_URL}/search.json?q=book&sort=new&limit=${limit}`,
+    getRecentBooks: (limit: number = 10) => `${BASE_URL}/trending/daily.json?limit=${limit}`,
 };

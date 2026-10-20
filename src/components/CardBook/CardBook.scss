@@ -125,6 +125,17 @@ $shadow-hover: 0 12px 28px rgba(15, 23, 42, 0.12);
             border-radius: 20px;
             text-transform: uppercase;
             letter-spacing: 0.04em;
+            transition: all 0.2s ease;
+
+            &.available {
+                color: #059669;
+                background-color: #ecfdf5;
+            }
+
+            &.not-available {
+                color: #b91c1c;
+                background-color: #fee2e2;
+            }
         }
 
         .rating {
@@ -230,14 +241,32 @@ $shadow-hover: 0 12px 28px rgba(15, 23, 42, 0.12);
         border: none;
         box-shadow: 0 4px 10px rgba(30, 64, 175, 0.2);
 
-        &:hover {
+        &:hover:not(:disabled) {
             background-color: $primary-hover;
             box-shadow: 0 6px 16px rgba(30, 64, 175, 0.3);
             transform: translateY(-1px);
         }
 
-        &:active {
+        &:active:not(:disabled) {
             transform: translateY(0);
+        }
+
+        &:disabled {
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        &.is-rented {
+            background-color: #15803d;
+            color: #ffffff;
+            cursor: not-allowed;
+
+            &:hover {
+                background-color: #15803d;
+                transform: none;
+                box-shadow: none;
+            }
         }
     }
 

@@ -1,4 +1,4 @@
-import { memo, useState } from "react";
+import { memo, useState, useEffect } from "react";
 import { useNavigate } from "react-router";
 import "./CardBook.scss";
 import { loansService } from "../../services/loans.service";
@@ -17,19 +17,40 @@ export interface CardBookProps {
 const FALLBACK_COVER = 'https://images.unsplash.com/photo-1543002588-bfa74002ed7e?w=400&q=80';
 
 function CardBookComponent({id, cover_i, title, author_name, subject, language}: CardBookProps) {
+    const workId = String(id).replace('/works/', '').trim();
+    const [isRented, setIsRented] = useState<boolean>(() => loansService.isBookRentedSync(workId));
     const [isRenting, setIsRenting] = useState(false);
-    const [rentSuccess, setRentSuccess] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const initialCover = cover_i ? `https://covers.openlibrary.org/b/id/${cover_i}-M.jpg` : FALLBACK_COVER;
     const [coverImage, setCoverImage] = useState(initialCover);
     const { addNotification } = useNotifications();
-    
     const navigate = useNavigate();
-    const workId = String(id).replace('/works/', '');
+
     const formattedAuthor = Array.isArray(author_name) ? author_name.slice(0, 2).join(", ") : (author_name || "Unknown Author");
     const formattedSubject = Array.isArray(subject) ? subject.slice(0, 3).join(", ") : (subject || "General");
 
+    useEffect(() => {
+        let isMounted = true;
+        loansService.isBookRented(workId).then((rented) => {
+            if (isMounted) {
+                setIsRented(rented);
+            }
+        });
+
+        const unsubscribe = loansService.subscribeToRentalChanges(workId, (rented) => {
+            if (isMounted) {
+                setIsRented(rented);
+            }
+        });
+
+        return () => {
+            isMounted = false;
+            unsubscribe();
+        };
+    }, [workId]);
+
     const handleRent = async () => {
+        if (isRented || isRenting) return;
         try {
             setIsRenting(true);
             setError(null);
@@ -38,22 +59,22 @@ function CardBookComponent({id, cover_i, title, author_name, subject, language}:
                 bookDetails: {
                     openLibraryKey: workId,
                     title,
-                    authorName: Array.isArray(author_name) ? author_name : [author_name || 'Unknown'],
+                    authorName: Array.isArray(author_name) ? author_name : [author_name || 'Unknown Author'],
                     coverId: cover_i || 0,
                     subject: Array.isArray(subject) ? subject : [subject || 'General'],
                     language: language || 'eng',
+                    totalCopies: 1,
                 },
                 notes: 'Requested from digital catalog',
             });
 
-            setRentSuccess(true);
+            setIsRented(true);
             addNotification({
                 title: 'Préstamo solicitado',
                 message: `Has solicitado "${title}" exitosamente.`,
                 type: 'success',
                 link: '/loans',
             });
-            setTimeout(() => setRentSuccess(false), 4000);
         } catch (err: unknown) {
             const errorMessage = err instanceof Error ? err.message : 'Could not request loan';
             setError(errorMessage);
@@ -70,6 +91,8 @@ function CardBookComponent({id, cover_i, title, author_name, subject, language}:
                     <img 
                         src={coverImage}
                         alt={title}
+                        loading="lazy"
+                        decoding="async"
                         onError={() => setCoverImage(FALLBACK_COVER)}
                     />
                     <SaveBookButton
@@ -84,7 +107,9 @@ function CardBookComponent({id, cover_i, title, author_name, subject, language}:
                 </div>
 
                 <div>
-                    <p>Availability</p>
+                    <p className={`availability-status ${isRented ? 'not-available' : 'available'}`}>
+                        {isRented ? 'Not Availability' : 'Availability'}
+                    </p>
                     <div className="rating">
                         <span className="material-symbols-outlined">star</span>
                         <p>4.9</p>
@@ -102,15 +127,14 @@ function CardBookComponent({id, cover_i, title, author_name, subject, language}:
 
             <div className="cardBook-actions">
                 <button 
-                    className="rent-button" 
+                    className={`rent-button ${isRented ? 'is-rented' : ''}`}
                     onClick={handleRent}
-                    disabled={isRenting || rentSuccess}
-                    style={rentSuccess ? { backgroundColor: '#2e7d32', color: 'white' } : {}}
+                    disabled={isRenting || isRented}
                 >
                     <span className="material-symbols-outlined">
-                        {rentSuccess ? 'check_circle' : 'hand_package'}
+                        {isRented ? 'check_circle' : 'hand_package'}
                     </span>
-                    {isRenting ? 'Requesting...' : rentSuccess ? 'Rented!' : 'Rent'}
+                    {isRenting ? 'Requesting...' : isRented ? 'Rented' : 'Rent'}
                 </button>
                 <button
                     className="view-button"

@@ -1,8 +1,6 @@
 import { useState } from "react";
 import logo from "../../assets/Logo.png";
 import "./Authentication.scss";
-import { useAuth } from "../../context/AuthContext";
-import { useNavigate } from "react-router";
 import { LoginForm } from "../../components/Login/LoginForm";
 import { RegisterForm } from "../../components/Register/RegisterForm";
 
@@ -31,12 +29,6 @@ function getAuthErrorMessage(message: string) {
 
 export const Authentication = () => {
   const [view, setView] = useState<View>("login");
-  const { isAuthenticated } = useAuth();
-  const navigate = useNavigate();
-
-  if (isAuthenticated) {
-    navigate("/dashboard");
-  }
 
   const toggleView = () => setView(view === "login" ? "register" : "login");
 

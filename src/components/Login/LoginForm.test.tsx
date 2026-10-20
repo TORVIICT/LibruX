@@ -5,9 +5,11 @@ import { LoginForm } from './LoginForm';
 import { login } from '../../services/auth.service';
 
 const mockNavigate = vi.fn();
+const mockLocation = { state: null, pathname: '/' };
 
 vi.mock('react-router', () => ({
   useNavigate: () => mockNavigate,
+  useLocation: () => mockLocation,
 }));
 
 vi.mock('../../services/auth.service', () => ({
@@ -75,7 +77,7 @@ describe('LoginForm', () => {
     vi.mocked(login).mockResolvedValueOnce({
       data: mockAuthData,
       error: null,
-    } as any);
+    } as unknown as Awaited<ReturnType<typeof login>>);
 
     render(<LoginForm {...defaultProps} />);
 
@@ -89,7 +91,7 @@ describe('LoginForm', () => {
 
     expect(defaultProps.saveToken).toHaveBeenCalledWith('mock-jwt-token-123');
     expect(localStorage.getItem('user-name')).toBe('Jane Doe');
-    expect(mockNavigate).toHaveBeenCalledWith('/dashboard');
+    expect(mockNavigate).toHaveBeenCalledWith('/dashboard', { replace: true });
     expect(screen.getByText('Login saved successfully!')).toBeInTheDocument();
   });
 
@@ -98,7 +100,7 @@ describe('LoginForm', () => {
     vi.mocked(login).mockResolvedValueOnce({
       data: null,
       error: { message: 'Invalid credentials' },
-    } as any);
+    } as unknown as Awaited<ReturnType<typeof login>>);
 
     render(<LoginForm {...defaultProps} />);
 
