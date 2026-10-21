@@ -70,8 +70,8 @@ function CardBookComponent({id, cover_i, title, author_name, subject, language}:
 
             setIsRented(true);
             addNotification({
-                title: 'Préstamo solicitado',
-                message: `Has solicitado "${title}" exitosamente.`,
+                title: 'Loan requested',
+                message: `You have successfully requested "${title}".`,
                 type: 'success',
                 link: '/loans',
             });

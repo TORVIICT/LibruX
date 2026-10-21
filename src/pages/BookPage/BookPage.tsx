@@ -113,8 +113,8 @@ export default function BookPage() {
             });
             setIsRented(true);
             addNotification({
-                title: "Préstamo solicitado",
-                message: `Has solicitado "${data?.title || stateData?.title}" exitosamente.`,
+                title: "Loan requested",
+                message: `You have successfully requested "${data?.title || stateData?.title}".`,
                 type: "success",
                 link: "/loans",
             });
